@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinControl v14 - Cartões Pro</title>
+    <title>FinControl v14 - Master</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
@@ -30,7 +30,7 @@
         body { background: var(--bg-body); color: var(--text-main); height: 100vh; overflow: hidden; transition: 0.3s; }
         .icon { font-size: 1.2rem; margin-right: 10px; }
 
-        /* --- LAYOUT & COMPONENTES (Reutilizados e Otimizados) --- */
+        /* --- LAYOUT & COMPONENTES --- */
         .app-layout { display: flex; height: 100%; display: none; }
         #sidebar { width: 280px; background: var(--bg-card); display: flex; flex-direction: column; border-right: 1px solid var(--border-color); z-index: 2000; transition: 0.3s; }
         .brand { padding: 30px 25px; font-size: 1.4rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 10px; }
@@ -83,7 +83,7 @@
         .toast { padding: 15px 20px; background: var(--bg-card); border-left: 5px solid var(--primary); box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-radius: 8px; margin-bottom:10px; font-weight: 500; animation: slideIn 0.3s; }
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
 
-        /* Estilos Específicos de Cartão */
+        /* Estilos Cartão */
         .card-mini { display: flex; justify-content: space-between; align-items: center; padding: 15px; border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 10px; }
         .card-tag { font-size: 0.75rem; background: var(--accent-purple); color: white; padding: 3px 8px; border-radius: 4px; }
         .installments-badge { font-size: 0.75rem; background: #eee; padding: 2px 6px; border-radius: 4px; color: #555; }
@@ -96,7 +96,7 @@
     <div id="login-screen">
         <div class="login-card">
             <h1 style="color:var(--primary); margin-bottom:10px;">FinControl v14</h1>
-            <p style="color:var(--text-muted);">Cartões, Parcelamento e Controle.</p>
+            <p style="color:var(--text-muted);">Acesso Seguro (Google)</p>
             <br>
             <button class="btn" style="background:white; border:1px solid #ddd; width:100%; display:flex; align-items:center; justify-content:center; gap:10px;" onclick="fazerLogin()">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20"> Entrar com Google
@@ -126,7 +126,7 @@
 
         <main class="main-content">
             <header>
-                <strong>Finanças</strong>
+                <strong>Gestão Financeira</strong>
                 <button onclick="toggleMenu(true)" style="background:none; border:none; font-size:24px;">☰</button>
             </header>
 
@@ -134,7 +134,7 @@
                 
                 <section id="dashboard" class="screen active">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; flex-wrap:wrap; gap:10px;">
-                        <div><h2>Bom dia!</h2><p style="color:var(--text-muted); font-size:0.9rem;">Resumo mensal.</p></div>
+                        <div><h2>Bom dia!</h2><p style="color:var(--text-muted); font-size:0.9rem;">Resumo de contas e cartões.</p></div>
                         <div style="display:flex; gap:10px;">
                             <input type="month" id="filtro-data" class="form-control" style="width:auto; margin:0;" onchange="renderizarInterface()">
                             <button class="btn" style="padding:10px;" onclick="limparFiltro()">Todos</button>
@@ -143,11 +143,11 @@
 
                     <div class="summary-grid">
                         <div class="summary-card saldo">
-                            <span style="color:var(--text-muted); font-size:0.9rem;">Saldo em Conta</span>
+                            <span style="color:var(--text-muted); font-size:0.9rem;">Saldo (Disponível)</span>
                             <div class="summary-val" id="dash-saldo">R$ 0,00</div>
                         </div>
                         <div class="summary-card cartao">
-                            <span style="color:var(--text-muted); font-size:0.9rem;">Faturas (Vencimento no Mês)</span>
+                            <span style="color:var(--text-muted); font-size:0.9rem;">Fatura (Venc. Mês)</span>
                             <div class="summary-val" style="color:var(--accent-purple)" id="dash-fatura">R$ 0,00</div>
                         </div>
                         <div class="summary-card">
@@ -163,7 +163,7 @@
 
                 <section id="lancamentos" class="screen">
                     <div style="display:flex; justify-content:space-between; margin-bottom:20px;"><h2>Extrato</h2><button class="btn btn-primary" onclick="exportarCSV()">📥 CSV</button></div>
-                    <div class="card table-container"><table id="tabela-extrato"><thead><tr><th>Data</th><th>Desc</th><th>Tipo</th><th>Valor</th><th>Ação</th></tr></thead><tbody></tbody></table></div>
+                    <div class="card table-container"><table id="tabela-extrato"><thead><tr><th>Data</th><th>Desc</th><th>Pagamento</th><th>Valor</th><th>Ação</th></tr></thead><tbody></tbody></table></div>
                 </section>
 
                 <section id="adicionar" class="screen">
@@ -251,7 +251,7 @@
     </div>
 
     <script>
-        // --- CHAVES FIREBASE (COLE AS SUAS AQUI) ---
+        // --- SUAS CHAVES DO FIREBASE INSERIDAS AQUI ---
         const firebaseConfig = {
             apiKey: "AIzaSyAXU77W9IhtnAlM_vMUEMgM9_WScjEQaVU",
             authDomain: "app-financeiro-c2984.firebaseapp.com",
@@ -261,6 +261,7 @@
             appId: "1:296730284016:web:b327a149cf0a7c059ed735",
             measurementId: "G-4XWB5TYSY6"
         };
+
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
@@ -271,7 +272,6 @@
         let cartoes = [];
         let chartInstance = null;
 
-        // --- AUTH ---
         auth.onAuthStateChanged((u) => {
             if (u) {
                 user = u;
@@ -291,22 +291,17 @@
             auth.signInWithPopup(provider).catch(e => alert(e.message));
         }
 
-        // --- LOADERS ---
         function initListeners() {
-            // Transações
             db.collection('users').doc(user.uid).collection('transacoes').orderBy('data', 'desc')
                 .onSnapshot(snap => { transacoes = snap.docs.map(d => ({ id: d.id, ...d.data() })); renderizarInterface(); });
             
-            // Categorias
             db.collection('users').doc(user.uid).collection('categorias').orderBy('nome', 'asc')
                 .onSnapshot(snap => { categorias = snap.docs.map(d => ({ id: d.id, ...d.data() })); renderizarCats(); });
 
-            // Cartões
             db.collection('users').doc(user.uid).collection('cartoes')
                 .onSnapshot(snap => { cartoes = snap.docs.map(d => ({ id: d.id, ...d.data() })); renderizarCartoes(); });
         }
 
-        // --- INTERFACE ---
         function toggleCartaoFields() {
             const tipo = document.getElementById('input-tipo').value;
             const metodo = document.getElementById('input-metodo').value;
@@ -334,21 +329,14 @@
 
             dados.forEach(t => {
                 const val = parseFloat(t.val);
-                
                 if(t.tipo === 'entrada') {
-                    receita += val;
-                    saldo += val;
+                    receita += val; saldo += val;
                 } else {
-                    // É Saída
-                    if(t.metodo === 'credito') {
-                        fatura += val; // Entra na fatura do mês filtrado
-                    } else {
-                        saldo -= val; // Sai do saldo
-                    }
+                    if(t.metodo === 'credito') fatura += val;
+                    else saldo -= val;
                     gastosCat[t.cat] = (gastosCat[t.cat] || 0) + val;
                 }
 
-                // Badge de Parcelamento
                 let extraInfo = '';
                 if(t.parcela) extraInfo = `<span class="installments-badge">${t.parcela}</span>`;
                 else if(t.metodo === 'credito') extraInfo = `<span class="card-tag">Crédito</span>`;
@@ -368,12 +356,10 @@
             renderizarGrafico(gastosCat);
         }
 
-        // --- CARTÕES E PARCELAMENTO (O MOTOR) ---
         function addCartao() {
             const nome = document.getElementById('novo-card-nome').value;
             const fech = parseInt(document.getElementById('novo-card-fech').value);
             const venc = parseInt(document.getElementById('novo-card-venc').value);
-            
             if(nome && fech && venc) {
                 db.collection('users').doc(user.uid).collection('cartoes').add({ nome, fech, venc });
                 document.getElementById('novo-card-nome').value = '';
@@ -385,14 +371,12 @@
             const div = document.getElementById('lista-cartoes');
             const sel = document.getElementById('input-cartao-id');
             div.innerHTML = ''; sel.innerHTML = '';
-
             cartoes.forEach(c => {
                 div.innerHTML += `<div class="card-mini"><b>${c.nome}</b> <small>Fecha dia ${c.fech} / Vence dia ${c.venc}</small> <button onclick="deletarItem('cartoes','${c.id}')" class="btn-icon" style="color:red;">✕</button></div>`;
                 sel.innerHTML += `<option value="${c.id}" data-fech="${c.fech}" data-venc="${c.venc}" data-nome="${c.nome}">${c.nome}</option>`;
             });
         }
 
-        // LÓGICA DE SALVAR COM PARCELAMENTO
         document.getElementById('form-transacao').addEventListener('submit', (e) => {
             e.preventDefault();
             const btn = document.getElementById('btn-salvar');
@@ -403,33 +387,25 @@
             const desc = document.getElementById('input-desc').value;
             const cat = document.getElementById('input-categoria').value;
             const valorTotal = parseFloat(document.getElementById('input-valor').value);
-            const dataCompra = new Date(document.getElementById('input-data').value + "T12:00:00"); // Fix Timezone
+            const dataCompra = new Date(document.getElementById('input-data').value + "T12:00:00");
 
-            const batch = db.batch(); // Usar lote para salvar várias parcelas de uma vez
+            const batch = db.batch();
 
             if (tipo === 'saida' && metodo === 'credito') {
                 const cartaoId = document.getElementById('input-cartao-id').value;
                 const parcelas = parseInt(document.getElementById('input-parcelas').value);
-                
-                // Encontrar dados do cartão
                 const cartaoInfo = document.getElementById('input-cartao-id').options[document.getElementById('input-cartao-id').selectedIndex];
                 const diaFechamento = parseInt(cartaoInfo.getAttribute('data-fech'));
                 const diaVencimento = parseInt(cartaoInfo.getAttribute('data-venc'));
                 const nomeCartao = cartaoInfo.getAttribute('data-nome');
-
                 const valorParcela = valorTotal / parcelas;
 
                 for (let i = 0; i < parcelas; i++) {
                     let dataVencimento = new Date(dataCompra);
-                    
-                    // Lógica de Fechamento: Se comprou dia 6 e fecha dia 5, só cai no próximo mês
                     let acrescimoMes = i;
-                    if (dataCompra.getDate() >= diaFechamento) {
-                        acrescimoMes++; // Pula para a próxima fatura
-                    }
-
+                    if (dataCompra.getDate() >= diaFechamento) { acrescimoMes++; }
                     dataVencimento.setMonth(dataVencimento.getMonth() + acrescimoMes);
-                    dataVencimento.setDate(diaVencimento); // Seta para o dia de vencimento da fatura
+                    dataVencimento.setDate(diaVencimento);
 
                     const ref = db.collection('users').doc(user.uid).collection('transacoes').doc();
                     batch.set(ref, {
@@ -437,18 +413,12 @@
                         desc: `${desc} (${i+1}/${parcelas}) - ${nomeCartao}`,
                         val: valorParcela,
                         data: dataVencimento.toISOString().split('T')[0],
-                        parcela: `${i+1}/${parcelas}`,
-                        originalCompra: dataCompra.toISOString().split('T')[0]
+                        parcela: `${i+1}/${parcelas}`
                     });
                 }
-
             } else {
-                // Lançamento normal (Débito ou Receita)
                 const ref = db.collection('users').doc(user.uid).collection('transacoes').doc();
-                batch.set(ref, {
-                    tipo, metodo, desc, cat, val: valorTotal,
-                    data: document.getElementById('input-data').value
-                });
+                batch.set(ref, { tipo, metodo, desc, cat, val: valorTotal, data: document.getElementById('input-data').value });
             }
 
             batch.commit().then(() => {
@@ -459,7 +429,6 @@
             }).catch(e => alert(e)).finally(() => { btn.innerText = "Lançar"; btn.disabled = false; });
         });
 
-        // --- UTILS ---
         function renderizarCats() {
             const div = document.getElementById('lista-cats-config');
             const sel = document.getElementById('input-categoria');
