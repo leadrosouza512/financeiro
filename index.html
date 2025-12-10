@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinControl Cloud</title>
+    <title>FinControl Cloud Ultimate</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -11,148 +12,242 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <style>
-        /* --- DESIGN SYSTEM --- */
+        /* --- 1. DESIGN SYSTEM --- */
         :root {
-            --primary: #820ad1; --secondary: #00d283; --danger: #ff4757; 
-            --bg-body: #f3f4f6; --bg-card: #ffffff; --text-main: #1e272e;
-            --border: #e1e1e6; --shadow: 0 4px 15px rgba(0,0,0,0.05);
+            --primary: #820ad1; --primary-hover: #6e08b1;
+            --secondary: #00d283; --danger: #ff4757; 
+            --dark: #1e272e; --gray: #808e9b; --light: #f3f4f6; --white: #ffffff;
+            --text: #1e272e; --shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
         [data-theme="dark"] {
-            --bg-body: #121212; --bg-card: #1e1e1e; --text-main: #f3f4f6;
-            --border: #333; --shadow: 0 4px 15px rgba(0,0,0,0.3);
+            --light: #121212; --white: #1e1e1e; --text: #f3f4f6;
+            --gray: #a4b0be; --shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: var(--bg-body); color: var(--text-main); height: 100vh; overflow: hidden; transition: 0.3s; }
+        body { background: var(--light); color: var(--text); height: 100vh; overflow: hidden; transition: 0.3s; }
 
-        /* --- LOGIN SCREEN --- */
+        /* --- 2. TELA DE LOGIN --- */
         #login-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-body); z-index: 9999;
-            display: flex; justify-content: center; align-items: center; flex-direction: column;
+            background: var(--light); z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
-        .login-box {
-            background: var(--bg-card); padding: 40px; border-radius: 20px;
-            box-shadow: var(--shadow); text-align: center; max-width: 400px; width: 90%;
+        .login-card {
+            background: var(--white); padding: 40px; border-radius: 20px;
+            box-shadow: var(--shadow); text-align: center; width: 90%; max-width: 400px;
         }
         .btn-google {
-            background: #fff; color: #444; border: 1px solid #ddd;
+            background: #fff; color: #555; border: 1px solid #ddd;
             padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer;
             display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin-top: 20px;
+            transition: 0.2s;
         }
-        .btn-google:hover { background: #f1f1f1; }
-
-        /* --- APP LAYOUT --- */
-        .app-layout { display: flex; height: 100%; display: none; /* Escondido até logar */ }
-        .sidebar { width: 260px; background: var(--bg-card); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 2000; transition: 0.3s; }
-        .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
-        .top-header { background: var(--bg-card); padding: 15px 20px; display: none; justify-content: space-between; align-items: center; box-shadow: var(--shadow); z-index: 1000; }
-        .content-scroll { flex: 1; overflow-y: auto; padding: 30px; }
-
-        /* --- COMPONENTS --- */
-        .card { background: var(--bg-card); border-radius: 16px; padding: 25px; box-shadow: var(--shadow); margin-bottom: 20px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .stat-card.primary { background: linear-gradient(135deg, var(--primary), #6e08b1); color: white; }
-        .stat-value { font-size: 2rem; font-weight: 700; }
-        
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th, td { padding: 15px; border-bottom: 1px solid var(--border); text-align: left; }
-        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
-        .btn-primary { background: var(--primary); color: white; width: 100%; }
-        .form-input { width: 100%; padding: 12px; border: 1px solid var(--border); background: var(--bg-body); color: var(--text-main); border-radius: 8px; margin-bottom: 15px; }
-        
-        /* Loading Spinner */
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+        .btn-google:hover { background: #f8f8f8; border-color: #ccc; }
+        .loader {
+            border: 4px solid #f3f3f3; border-top: 4px solid var(--primary);
+            border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto;
+        }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Responsive */
-        .overlay-mobile { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1500; opacity: 0; visibility: hidden; transition: 0.3s; }
-        .overlay-mobile.visible { opacity: 1; visibility: visible; }
+        /* --- 3. LAYOUT APP --- */
+        .app-layout { display: flex; height: 100%; display: none; /* Escondido até logar */ }
+        
+        /* Sidebar */
+        #sidebar {
+            width: 260px; background: var(--white); display: flex; flex-direction: column;
+            border-right: 1px solid var(--gray); z-index: 2000; transition: transform 0.3s ease;
+        }
+        .brand { padding: 25px; font-size: 1.5rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        .menu-list { list-style: none; padding: 0 15px; margin-top: 20px; flex: 1; }
+        .menu-link {
+            display: flex; align-items: center; padding: 12px 15px; text-decoration: none;
+            color: var(--gray); border-radius: 12px; font-weight: 500; cursor: pointer; margin-bottom: 5px; transition: 0.2s;
+        }
+        .menu-link:hover, .menu-link.active { background: rgba(130, 10, 209, 0.1); color: var(--primary); }
+        .user-info { padding: 20px; border-top: 1px solid var(--gray); display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
+        .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); }
+
+        /* Conteúdo */
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        header { background: var(--white); padding: 15px 20px; display: none; justify-content: space-between; align-items: center; box-shadow: var(--shadow); z-index: 1000; }
+        .page-content { flex: 1; overflow-y: auto; padding: 30px; padding-bottom: 80px; }
+
+        /* --- 4. COMPONENTES UI --- */
+        .card { background: var(--white); padding: 25px; border-radius: 16px; box-shadow: var(--shadow); margin-bottom: 20px; color: var(--text); }
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .card-total { background: linear-gradient(135deg, var(--primary), var(--primary-hover)); color: white; }
+        .balance { font-size: 2rem; font-weight: bold; margin-top: 5px; }
+        .label { font-size: 0.85rem; opacity: 0.8; }
+        
+        /* Tabelas */
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        td, th { padding: 15px; border-bottom: 1px solid var(--gray); text-align: left; color: var(--text); }
+        th { color: var(--gray); font-size: 0.85rem; }
+        
+        /* Botões e Forms */
+        .btn { padding: 12px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; width: 100%; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-icon { background: none; border: none; cursor: pointer; font-size: 1.1rem; }
+        .form-control { width: 100%; padding: 12px; border: 1px solid var(--gray); background: var(--light); color: var(--text); border-radius: 8px; margin-bottom: 15px; }
+
+        /* --- 5. MODAIS (Custom) --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 4000;
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; visibility: hidden; transition: 0.2s;
+        }
+        .modal-overlay.open { opacity: 1; visibility: visible; }
+        .modal-box {
+            background: var(--white); padding: 25px; border-radius: 16px; width: 90%; max-width: 400px;
+            transform: scale(0.95); transition: 0.2s;
+        }
+        .modal-overlay.open .modal-box { transform: scale(1); }
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+        /* --- 6. TOASTS --- */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 5000; display: flex; flex-direction: column; gap: 10px; }
+        .toast { padding: 15px 20px; background: var(--white); border-left: 5px solid var(--primary); box-shadow: 0 5px 15px rgba(0,0,0,0.2); border-radius: 8px; animation: slideIn 0.3s; display: flex; align-items: center; gap: 10px; }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+        /* --- 7. MOBILE --- */
+        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1500; opacity: 0; visibility: hidden; transition: 0.3s; }
+        #overlay.visible { opacity: 1; visibility: visible; }
         .screen { display: none; animation: fadeIn 0.3s; } .screen.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        @media (max-width: 768px) {
-            .sidebar { position: fixed; height: 100%; left: -280px; }
-            .sidebar.active { transform: translateX(280px); }
-            .top-header { display: flex; }
+        @media (max-width: 768px) { 
+            #sidebar { position: fixed; top: 0; left: 0; height: 100%; transform: translateX(-100%); }
+            #sidebar.open { transform: translateX(0); }
+            header { display: flex; }
+            .btn-close-menu { display: block !important; color: var(--danger); text-align: center; margin-top: 10px; cursor: pointer; }
         }
-        
-        /* User Info in Sidebar */
-        .user-info { padding: 20px; border-top: 1px solid var(--border); margin-top: auto; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
-        .user-avatar { width: 35px; height: 35px; border-radius: 50%; background: var(--primary); color: white; display: flex; justify-content: center; align-items: center; font-weight: bold; }
+        .btn-close-menu { display: none; }
     </style>
 </head>
 <body>
 
+    <div id="toast-container"></div>
+
     <div id="login-screen">
-        <div class="login-box">
-            <h1 style="color: var(--primary);">FinControl Cloud</h1>
-            <p style="color: var(--text-main); opacity: 0.7; margin: 10px 0;">Seus dados, em qualquer lugar.</p>
-            <div id="login-loader" class="loader" style="display: none;"></div>
-            <button class="btn-google" onclick="fazerLogin()">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
-                Entrar com Google
-            </button>
+        <div class="login-card">
+            <h1 style="color:var(--primary); margin-bottom: 10px;">FinControl Cloud</h1>
+            <p>Seu financeiro em qualquer lugar.</p>
+            <div id="login-loader" class="loader" style="display:none;"></div>
+            <div id="login-buttons">
+                <button class="btn-google" onclick="fazerLogin()">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+                    Entrar com Google
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-delete" class="modal-overlay">
+        <div class="modal-box">
+            <h3>🗑️ Excluir Item?</h3>
+            <p style="opacity:0.8; margin-top:10px;">Essa ação apagará o dado permanentemente da nuvem.</p>
+            <div class="modal-actions">
+                <button class="btn" style="background:transparent; color:var(--gray);" onclick="fecharModal('modal-delete')">Cancelar</button>
+                <button class="btn btn-danger" id="btn-confirm-delete">Sim, Excluir</button>
+            </div>
         </div>
     </div>
 
     <div class="app-layout" id="app-interface">
-        <div id="overlay-mobile" class="overlay-mobile" onclick="toggleMenu(false)"></div>
+        <div id="overlay" onclick="toggleMenu(false)"></div>
 
-        <aside class="sidebar" id="sidebar">
-            <div style="padding: 25px; font-size: 1.5rem; font-weight: 800; color: var(--primary);">🚀 FinCloud</div>
-            <ul style="list-style: none; padding: 0 15px; margin-top: 20px;">
-                <li style="margin-bottom: 5px;"><div onclick="navegar('dashboard')" style="padding: 12px; cursor: pointer;">📊 Dashboard</div></li>
-                <li style="margin-bottom: 5px;"><div onclick="navegar('lancamentos')" style="padding: 12px; cursor: pointer;">📝 Extrato</div></li>
-                <li style="margin-bottom: 5px;"><div onclick="navegar('adicionar')" style="padding: 12px; cursor: pointer;">➕ Novo</div></li>
-                <li style="margin-bottom: 5px;"><div onclick="navegar('config')" style="padding: 12px; cursor: pointer;">⚙️ Config</div></li>
+        <aside id="sidebar">
+            <div class="brand">🚀 FinCloud</div>
+            <ul class="menu-list">
+                <li><a class="menu-link active" onclick="navegar('dashboard', this)">📊 Dashboard</a></li>
+                <li><a class="menu-link" onclick="navegar('lancamentos', this)">📝 Extrato</a></li>
+                <li><a class="menu-link" onclick="navegar('adicionar', this)">➕ Novo</a></li>
+                <li><a class="menu-link" onclick="navegar('config', this)">⚙️ Config</a></li>
+                <li><a class="menu-link" onclick="alternarTema()">🌓 Tema</a></li>
+                <li class="btn-close-menu" onclick="toggleMenu(false)">✕ Fechar Menu</li>
             </ul>
             <div class="user-info">
-                <img id="user-photo" class="user-avatar" src="" alt="U">
+                <img id="user-photo" class="user-avatar" src="" alt="">
                 <div>
-                    <div id="user-name" style="font-weight: bold;">Usuário</div>
-                    <div onclick="fazerLogout()" style="color: var(--danger); cursor: pointer; font-size: 0.8rem;">Sair da conta</div>
+                    <div id="user-name" style="font-weight:bold;">Usuário</div>
+                    <div onclick="auth.signOut()" style="color:var(--danger); cursor:pointer; font-size:0.8rem;">Sair</div>
                 </div>
             </div>
         </aside>
 
-        <main class="main-wrapper">
-            <header class="top-header">
+        <main class="main-content">
+            <header>
                 <strong style="color:var(--primary)">FinControl</strong>
-                <button onclick="toggleMenu(true)" style="background:none; border:none; font-size: 24px;">☰</button>
+                <button onclick="toggleMenu(true)" style="background:none; border:none; font-size:24px;">☰</button>
             </header>
 
-            <div class="content-scroll">
+            <div class="page-content">
                 
                 <section id="dashboard" class="screen active">
-                    <h2>Visão Geral</h2><br>
-                    <div class="stats-grid">
-                        <div class="card stat-card primary">
-                            <small style="opacity:0.8">Saldo Atual</small>
-                            <div class="stat-value" id="dash-saldo">R$ 0,00</div>
-                        </div>
-                        <div class="card"><small>Receitas</small><div class="stat-value" style="color:var(--secondary)" id="dash-receitas">R$ 0,00</div></div>
-                        <div class="card"><small>Despesas</small><div class="stat-value" style="color:var(--danger)" id="dash-despesas">R$ 0,00</div></div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <h2>Visão Geral</h2>
+                        <select id="filtro-mes" onchange="renderizarInterface()" class="form-control" style="width:auto; margin:0;">
+                            <option value="atual">📅 Este Mês</option>
+                            <option value="todos">📅 Todo o Período</option>
+                        </select>
                     </div>
-                    <div class="card" style="height: 300px;"><canvas id="grafico-rosca"></canvas></div>
+
+                    <div class="cards-grid">
+                        <div class="card card-total">
+                            <div class="label" style="color:white;">Saldo Atual</div>
+                            <div class="balance" id="dash-saldo">R$ 0,00</div>
+                        </div>
+                        <div class="card">
+                            <div class="label">Receitas</div>
+                            <div class="balance" style="color:var(--secondary)" id="dash-ent">R$ 0,00</div>
+                        </div>
+                        <div class="card">
+                            <div class="label">Despesas</div>
+                            <div class="balance" style="color:var(--danger)" id="dash-sai">R$ 0,00</div>
+                        </div>
+                    </div>
+
+                    <div class="cards-grid" style="grid-template-columns: 1fr 1fr;">
+                        <div class="card" style="min-height:300px;">
+                            <canvas id="grafico-rosca"></canvas>
+                        </div>
+                        <div class="card" style="min-height:300px;">
+                            <h3>Metas de Categoria</h3><br>
+                            <div id="lista-metas-dash"></div>
+                        </div>
+                    </div>
                 </section>
 
                 <section id="lancamentos" class="screen">
                     <h2>Extrato</h2><br>
-                    <div class="card" style="overflow-x:auto;">
-                        <table id="tabela-extrato"><thead><tr><th>Data</th><th>Desc</th><th>Valor</th><th>Ação</th></tr></thead><tbody></tbody></table>
+                    <div class="card table-container">
+                        <table id="tabela-extrato"><thead><tr><th>Data</th><th>Desc</th><th>Valor</th><th>Ações</th></tr></thead><tbody></tbody></table>
                     </div>
                 </section>
 
                 <section id="adicionar" class="screen">
                     <h2>Novo Lançamento</h2><br>
-                    <div class="card" style="max-width: 600px; margin: 0 auto;">
+                    <div class="card" style="max-width:600px; margin:0 auto;">
                         <form id="form-transacao">
-                            <select id="input-tipo" class="form-input"><option value="saida">💸 Despesa</option><option value="entrada">💰 Receita</option></select>
-                            <input type="text" id="input-desc" class="form-input" placeholder="Descrição" required>
-                            <select id="input-categoria" class="form-input"></select>
-                            <input type="number" step="0.01" id="input-valor" class="form-input" placeholder="0.00" required>
-                            <input type="date" id="input-data" class="form-input" required>
-                            <button type="submit" class="btn btn-primary" id="btn-salvar">Salvar na Nuvem</button>
+                            <label class="label">Tipo</label>
+                            <select id="input-tipo" class="form-control"><option value="saida">💸 Despesa</option><option value="entrada">💰 Receita</option></select>
+                            
+                            <label class="label">Descrição</label>
+                            <input type="text" id="input-desc" class="form-control" placeholder="Ex: Mercado" required>
+                            
+                            <label class="label">Categoria</label>
+                            <select id="input-categoria" class="form-control"></select>
+                            
+                            <label class="label">Valor</label>
+                            <input type="number" step="0.01" id="input-valor" class="form-control" placeholder="0.00" required>
+                            
+                            <label class="label">Data</label>
+                            <input type="date" id="input-data" class="form-control" required>
+
+                            <button type="submit" class="btn btn-primary" id="btn-salvar">Salvar na Nuvem ☁️</button>
                         </form>
                     </div>
                 </section>
@@ -160,13 +255,14 @@
                 <section id="config" class="screen">
                     <h2>Configurações</h2><br>
                     <div class="card">
-                        <h3>Categorias</h3><br>
+                        <h3>Categorias e Metas</h3><br>
                         <div style="display:flex; gap:10px;">
-                            <input type="text" id="nova-cat-nome" class="form-input" placeholder="Nome" style="margin:0;">
-                            <input type="number" id="nova-cat-meta" class="form-input" placeholder="Meta" style="margin:0;">
-                            <button onclick="addCategoriaCloud()" class="btn" style="background:var(--secondary); color:white;">+</button>
+                            <input type="text" id="nova-cat-nome" class="form-control" placeholder="Nome (Ex: Lazer)" style="margin:0;">
+                            <input type="number" id="nova-cat-meta" class="form-control" placeholder="Meta R$" style="margin:0;">
+                            <button onclick="addCategoriaCloud()" class="btn btn-primary" style="width:auto;">+</button>
                         </div>
-                        <div id="lista-cats" style="margin-top:20px;"></div>
+                        <br>
+                        <div id="lista-cats-config"></div>
                     </div>
                 </section>
 
@@ -175,8 +271,7 @@
     </div>
 
     <script>
-        // --- 1. CONFIGURAÇÃO DO FIREBASE (COLE SUA CHAVE AQUI) ---
-        // Você pegou isso no Passo 3 do painel do Firebase. Substitua tudo dentro das chaves {}.
+        // --- 1. CONFIGURAÇÃO FIREBASE (SUBSTITUA AQUI!) ---
         const firebaseConfig = {
   apiKey: "AIzaSyAXU77W9IhtnAlM_vMUEMgM9_WScjEQaVU",
   authDomain: "app-financeiro-c2984.firebaseapp.com",
@@ -187,10 +282,8 @@
   measurementId: "G-4XWB5TYSY6"
 };
 
-        // Inicializa Firebase
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        // Init Firebase
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
@@ -199,20 +292,18 @@
         let transacoes = [];
         let categorias = [];
         let chartInstance = null;
+        let deleteTarget = { col: null, id: null }; // Para o modal saber o que apagar
 
-        // --- 3. AUTENTICAÇÃO ---
+        // --- 3. AUTH & LISTENERS ---
         auth.onAuthStateChanged((u) => {
             if (u) {
                 user = u;
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('app-interface').style.display = 'flex';
-                
-                // Atualiza UI do usuário
                 document.getElementById('user-name').innerText = user.displayName;
                 document.getElementById('user-photo').src = user.photoURL;
-
-                // Inicia sincronização em Tempo Real
-                iniciarSincronizacao();
+                initListeners();
+                notificar(`Bem-vindo, ${user.displayName.split(' ')[0]}!`);
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('app-interface').style.display = 'none';
@@ -220,89 +311,157 @@
         });
 
         function fazerLogin() {
+            document.getElementById('login-loader').style.display = 'block';
+            document.getElementById('login-buttons').style.display = 'none';
             const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).catch(erro => alert("Erro ao logar: " + erro.message));
-        }
-
-        function fazerLogout() {
-            auth.signOut();
-            location.reload();
-        }
-
-        // --- 4. BANCO DE DADOS (FIRESTORE) ---
-        
-        // "Ouvir" o banco de dados (Realtime)
-        function iniciarSincronizacao() {
-            const userRef = db.collection('users').doc(user.uid);
-
-            // Ouvir Transações
-            userRef.collection('transacoes').onSnapshot((snapshot) => {
-                transacoes = [];
-                snapshot.forEach(doc => {
-                    transacoes.push({ id: doc.id, ...doc.data() });
-                });
-                atualizarInterface();
+            auth.signInWithPopup(provider).catch(erro => {
+                alert("Erro: " + erro.message);
+                document.getElementById('login-loader').style.display = 'none';
+                document.getElementById('login-buttons').style.display = 'block';
             });
+        }
+
+        function initListeners() {
+            // Ouvir Transações
+            db.collection('users').doc(user.uid).collection('transacoes')
+                .orderBy('data', 'desc')
+                .onSnapshot(snap => {
+                    transacoes = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderizarInterface();
+                });
 
             // Ouvir Categorias
-            userRef.collection('categorias').onSnapshot((snapshot) => {
-                categorias = [];
-                snapshot.forEach(doc => {
-                    categorias.push({ id: doc.id, ...doc.data() });
+            db.collection('users').doc(user.uid).collection('categorias')
+                .onSnapshot(snap => {
+                    categorias = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    if(categorias.length === 0) criarCatsPadrao();
+                    renderizarCats();
                 });
-                // Se não tiver categorias (primeiro acesso), cria padrões
-                if(categorias.length === 0) criarCategoriasPadrao();
-                renderizarConfigCats();
-                atualizarSelectCategorias();
+        }
+
+        function criarCatsPadrao() {
+            ['Moradia', 'Alimentação', 'Lazer', 'Transporte'].forEach(nome => {
+                db.collection('users').doc(user.uid).collection('categorias').add({ nome, meta: 1000 });
             });
         }
 
-        function criarCategoriasPadrao() {
-            const padroes = [
-                { nome: 'Moradia', meta: 2000 },
-                { nome: 'Alimentação', meta: 1000 },
-                { nome: 'Lazer', meta: 500 }
-            ];
-            padroes.forEach(c => db.collection('users').doc(user.uid).collection('categorias').add(c));
+        // --- 4. RENDERIZAÇÃO ---
+        function renderizarInterface() {
+            const filtro = document.getElementById('filtro-mes').value;
+            const hoje = new Date();
+            
+            // Filtragem
+            let dados = transacoes;
+            if (filtro === 'atual') {
+                dados = transacoes.filter(t => {
+                    const d = new Date(t.data);
+                    // Ajuste timezone simples
+                    const localDate = new Date(d.valueOf() + d.getTimezoneOffset() * 60000);
+                    return localDate.getMonth() === hoje.getMonth() && localDate.getFullYear() === hoje.getFullYear();
+                });
+            }
+
+            // Cálculos
+            let ent=0, sai=0, gastosPorCat={};
+            const tbody = document.querySelector('#tabela-extrato tbody');
+            tbody.innerHTML = '';
+
+            dados.forEach(t => {
+                if(t.tipo === 'entrada') ent += t.val;
+                else {
+                    sai += t.val;
+                    gastosPorCat[t.cat] = (gastosPorCat[t.cat] || 0) + t.val;
+                }
+
+                // Tabela HTML
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${new Date(t.data).toLocaleDateString()}<br><small>${t.cat}</small></td>
+                        <td>${t.desc}</td>
+                        <td style="color:${t.tipo==='entrada'?'var(--secondary)':'var(--danger)'}">R$ ${t.val.toFixed(2)}</td>
+                        <td><button onclick="confirmarDelete('transacoes', '${t.id}')" class="btn-icon">🗑️</button></td>
+                    </tr>`;
+            });
+
+            // Cards Dashboard
+            document.getElementById('dash-saldo').innerText = `R$ ${(ent-sai).toFixed(2)}`;
+            document.getElementById('dash-ent').innerText = `R$ ${ent.toFixed(2)}`;
+            document.getElementById('dash-sai').innerText = `R$ ${sai.toFixed(2)}`;
+
+            renderizarGraficos(gastosPorCat);
+            renderizarMetas(gastosPorCat);
         }
 
-        // Adicionar Transação
+        function renderizarMetas(gastosAtuais) {
+            const div = document.getElementById('lista-metas-dash');
+            div.innerHTML = '';
+            categorias.forEach(c => {
+                const gasto = gastosAtuais[c.nome] || 0;
+                const pct = Math.min((gasto/c.meta)*100, 100);
+                div.innerHTML += `
+                    <div style="margin-bottom:10px; font-size:0.85rem;">
+                        <div style="display:flex; justify-content:space-between;"><span>${c.nome}</span><span>${gasto}/${c.meta}</span></div>
+                        <div style="background:#eee; height:6px; border-radius:3px; overflow:hidden; margin-top:3px;">
+                            <div style="width:${pct}%; height:100%; background:${pct>90?'var(--danger)':'var(--primary)'}"></div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function renderizarCats() {
+            const lista = document.getElementById('lista-cats-config');
+            const select = document.getElementById('input-categoria');
+            lista.innerHTML = ''; select.innerHTML = '';
+
+            categorias.forEach(c => {
+                // Lista Config
+                lista.innerHTML += `
+                    <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
+                        <span><b>${c.nome}</b> (R$ ${c.meta})</span>
+                        <button onclick="confirmarDelete('categorias', '${c.id}')" class="btn-icon" style="color:red;">🗑️</button>
+                    </div>`;
+                // Select Form
+                select.innerHTML += `<option value="${c.nome}">${c.nome}</option>`;
+            });
+        }
+
+        function renderizarGraficos(dados) {
+            const ctx = document.getElementById('grafico-rosca').getContext('2d');
+            if(chartInstance) chartInstance.destroy();
+            
+            const labels = Object.keys(dados);
+            const values = Object.values(dados);
+            const colors = ['#820ad1', '#00d283', '#ff4757', '#f1c40f', '#3498db'];
+
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels: labels.length?labels:['Sem dados'], datasets: [{ data: values.length?values:[1], backgroundColor: labels.length?colors:['#eee'], borderWidth:0 }] },
+                options: { maintainAspectRatio: false, responsive: true }
+            });
+        }
+
+        // --- 5. AÇÕES ---
         document.getElementById('form-transacao').addEventListener('submit', (e) => {
             e.preventDefault();
             const btn = document.getElementById('btn-salvar');
-            btn.innerText = "Salvando...";
-            btn.disabled = true;
+            btn.disabled = true; btn.innerText = "Enviando...";
 
-            const nova = {
+            db.collection('users').doc(user.uid).collection('transacoes').add({
                 tipo: document.getElementById('input-tipo').value,
                 desc: document.getElementById('input-desc').value,
                 cat: document.getElementById('input-categoria').value,
                 val: parseFloat(document.getElementById('input-valor').value),
-                data: document.getElementById('input-data').value,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp() // Ordenação
-            };
-
-            db.collection('users').doc(user.uid).collection('transacoes').add(nova)
-                .then(() => {
-                    e.target.reset();
-                    document.getElementById('input-data').value = new Date().toISOString().split('T')[0];
-                    navegar('dashboard');
-                })
-                .catch(err => alert("Erro: " + err))
-                .finally(() => {
-                    btn.innerText = "Salvar na Nuvem";
-                    btn.disabled = false;
-                });
+                data: document.getElementById('input-data').value
+            }).then(() => {
+                e.target.reset();
+                document.getElementById('input-data').value = new Date().toISOString().split('T')[0];
+                notificar("Salvo na nuvem!");
+                navegar('dashboard');
+            }).catch(err => alert(err)).finally(() => {
+                btn.disabled = false; btn.innerText = "Salvar na Nuvem ☁️";
+            });
         });
 
-        // Deletar
-        function deletarItem(collection, id) {
-            if(confirm("Excluir item?")) {
-                db.collection('users').doc(user.uid).collection(collection).doc(id).delete();
-            }
-        }
-
-        // Adicionar Categoria
         function addCategoriaCloud() {
             const nome = document.getElementById('nova-cat-nome').value;
             const meta = parseFloat(document.getElementById('nova-cat-meta').value);
@@ -310,87 +469,56 @@
                 db.collection('users').doc(user.uid).collection('categorias').add({ nome, meta });
                 document.getElementById('nova-cat-nome').value = '';
                 document.getElementById('nova-cat-meta').value = '';
+                notificar("Categoria criada!");
             }
         }
 
-        // --- 5. RENDERIZAÇÃO ---
-        function atualizarInterface() {
-            let ent=0, sai=0, catGastos={};
-            const tb = document.querySelector('#tabela-extrato tbody');
-            tb.innerHTML = '';
-
-            // Ordenar por data
-            transacoes.sort((a,b) => new Date(b.data) - new Date(a.data));
-
-            transacoes.forEach(t => {
-                if(t.tipo === 'entrada') ent += t.val;
-                else { 
-                    sai += t.val;
-                    catGastos[t.cat] = (catGastos[t.cat] || 0) + t.val;
-                }
-
-                tb.innerHTML += `
-                    <tr>
-                        <td>${new Date(t.data).toLocaleDateString()}</td>
-                        <td>${t.desc}<br><small>${t.cat}</small></td>
-                        <td style="color:${t.tipo==='entrada'?'var(--secondary)':'var(--danger)'}">R$ ${t.val.toFixed(2)}</td>
-                        <td><button onclick="deletarItem('transacoes', '${t.id}')" style="border:none;background:none;cursor:pointer;">🗑️</button></td>
-                    </tr>`;
-            });
-
-            document.getElementById('dash-saldo').innerText = `R$ ${(ent-sai).toFixed(2)}`;
-            document.getElementById('dash-receitas').innerText = `R$ ${ent.toFixed(2)}`;
-            document.getElementById('dash-despesas').innerText = `R$ ${sai.toFixed(2)}`;
-            renderizarGrafico(catGastos);
+        // --- 6. SISTEMA DE DELETE (MODAL) ---
+        function confirmarDelete(col, id) {
+            deleteTarget = { col, id };
+            document.getElementById('modal-delete').classList.add('open');
         }
 
-        function renderizarConfigCats() {
-            const div = document.getElementById('lista-cats');
-            div.innerHTML = '';
-            categorias.forEach(c => {
-                div.innerHTML += `<div style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
-                    <span><b>${c.nome}</b> (Meta: ${c.meta})</span>
-                    <button onclick="deletarItem('categorias', '${c.id}')" style="border:none;background:none;cursor:pointer;color:red;">✕</button>
-                </div>`;
-            });
-        }
-
-        function atualizarSelectCategorias() {
-            const sel = document.getElementById('input-categoria');
-            sel.innerHTML = '';
-            categorias.forEach(c => {
-                sel.innerHTML += `<option value="${c.nome}">${c.nome}</option>`;
-            });
-        }
-
-        function renderizarGrafico(dados) {
-            const ctx = document.getElementById('grafico-rosca').getContext('2d');
-            if(chartInstance) chartInstance.destroy();
-            chartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(dados),
-                    datasets: [{ data: Object.values(dados), backgroundColor: ['#820ad1','#00d283','#ff4757','#ffa502'] }]
-                },
-                options: { maintainAspectRatio: false }
-            });
-        }
+        document.getElementById('btn-confirm-delete').onclick = () => {
+            if(deleteTarget.id) {
+                db.collection('users').doc(user.uid).collection(deleteTarget.col).doc(deleteTarget.id).delete();
+                notificar("Item excluído!");
+                fecharModal('modal-delete');
+            }
+        };
 
         // --- UTILS ---
-        function navegar(tela) {
+        function navegar(tela, el) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(tela).classList.add('active');
+            if(el) { document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active')); el.classList.add('active'); }
             toggleMenu(false);
         }
+
         function toggleMenu(s) {
             const sb = document.getElementById('sidebar');
-            const ov = document.getElementById('overlay-mobile');
-            if(s){ sb.classList.add('active'); ov.classList.add('visible'); }
-            else { sb.classList.remove('active'); ov.classList.remove('visible'); }
+            const ov = document.getElementById('overlay');
+            if(s){ sb.classList.add('open'); ov.classList.add('visible'); }
+            else { sb.classList.remove('open'); ov.classList.remove('visible'); }
         }
-        
-        // Init Date
+
+        function alternarTema() {
+            const b = document.body;
+            if(b.hasAttribute('data-theme')) { b.removeAttribute('data-theme'); localStorage.setItem('theme', 'light'); }
+            else { b.setAttribute('data-theme', 'dark'); localStorage.setItem('theme', 'dark'); }
+        }
+
+        function notificar(msg) {
+            const t = document.createElement('div'); t.className = 'toast';
+            t.innerHTML = `✅ ${msg}`;
+            document.getElementById('toast-container').appendChild(t);
+            setTimeout(()=>t.remove(), 3000);
+        }
+        function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
+
+        // Init
         document.getElementById('input-data').value = new Date().toISOString().split('T')[0];
+        if(localStorage.getItem('theme')==='dark') document.body.setAttribute('data-theme', 'dark');
     </script>
 </body>
 </html>
