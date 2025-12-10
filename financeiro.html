@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinControl Ultimate v5.0</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* --- 1. VARIÁVEIS E TEMAS --- */
+        :root {
+            --primary: #820ad1; --primary-dark: #6e08b1;
+            --secondary: #00d283; --danger: #ff4757; --warning: #f1c40f;
+            --dark: #1e272e; --gray: #808e9b; --light: #f3f4f6; --white: #ffffff;
+            --text-main: #1e272e; --shadow: 0 4px 15px rgba(0,0,0,0.05); --radius: 12px;
+        }
+        [data-theme="dark"] {
+            --light: #121212; --white: #1e1e1e; --text-main: #f3f4f6;
+            --gray: #a4b0be; --shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--light); color: var(--text-main); height: 100vh; overflow: hidden; transition: 0.3s; }
+
+        /* --- 2. LAYOUT --- */
+        .app-container { display: flex; height: 100%; }
+        #sidebar {
+            width: 260px; background: var(--white); display: flex; flex-direction: column;
+            border-right: 1px solid var(--gray); z-index: 1000; transition: 0.3s;
+        }
+        .brand { padding: 25px; font-size: 1.5rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        .menu-list { list-style: none; padding: 0 15px; margin-top: 20px; }
+        .menu-link {
+            display: flex; align-items: center; padding: 12px 15px; text-decoration: none;
+            color: var(--gray); border-radius: var(--radius); font-weight: 500; transition: 0.2s; cursor: pointer; margin-bottom: 5px;
+        }
+        .menu-link:hover, .menu-link.active { background-color: rgba(130, 10, 209, 0.1); color: var(--primary); }
+        .menu-icon { margin-right: 12px; font-size: 1.2rem; }
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .page-content { flex: 1; overflow-y: auto; padding: 30px; }
+        header { background: var(--white); padding: 15px 20px; display: none; justify-content: space-between; align-items: center; box-shadow: var(--shadow); }
+
+        /* --- 3. COMPONENTES --- */
+        .header-section { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 10px; }
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .card { background: var(--white); padding: 25px; border-radius: 16px; box-shadow: var(--shadow); position: relative; color: var(--text-main); }
+        .card-total { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; }
+        .card-total .balance { font-size: 2.2rem; font-weight: 700; margin-bottom: 15px; }
+        .info-value { font-size: 1.5rem; font-weight: 600; }
+        .text-green { color: var(--secondary); } .text-red { color: var(--danger); }
+        
+        /* Gráficos */
+        .dashboard-row { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; margin-bottom: 30px; }
+        .charts-container { display: grid; grid-template-columns: 1fr; gap: 20px; } /* Ajuste para Charts */
+
+        /* Tabelas e Busca */
+        .table-container { background: var(--white); border-radius: 16px; box-shadow: var(--shadow); padding: 20px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        th { text-align: left; color: var(--gray); padding: 15px 10px; font-size: 0.85rem; }
+        td { padding: 15px 10px; border-bottom: 1px solid var(--gray); font-size: 0.9rem; color: var(--text-main); opacity: 0.9; }
+        .btn-icon { background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 5px; }
+        #input-busca { padding: 8px 15px; border: 1px solid var(--gray); border-radius: 8px; background: var(--white); color: var(--text-main); width: 250px; }
+
+        /* Metas */
+        .meta-config-item { display: flex; justify-content: space-between; padding: 12px; background: var(--light); border: 1px solid var(--gray); border-radius: 8px; margin-bottom: 10px; }
+        .progress-bg { width: 100%; height: 8px; background: var(--light); border-radius: 4px; overflow: hidden; margin-top: 5px; }
+        .progress-fill { height: 100%; background: var(--secondary); transition: width 0.5s; }
+        .progress-fill.danger { background: var(--danger); }
+
+        /* Form e Buttons */
+        .form-container { max-width: 600px; background: var(--white); padding: 30px; border-radius: 16px; box-shadow: var(--shadow); margin: 0 auto; }
+        .form-control { width: 100%; padding: 12px; border: 1px solid var(--gray); background: var(--light); color: var(--text-main); border-radius: 8px; margin-bottom: 15px; }
+        .btn-submit { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-config { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid var(--gray); background: var(--white); color: var(--text-main); border-radius: 8px; cursor: pointer; text-align: left; }
+        .btn-add-meta { width: 100%; padding: 12px; margin-bottom: 15px; border: none; background: var(--secondary); color: white; border-radius: 8px; cursor: pointer; font-weight: bold; }
+
+        /* TOASTS (Notificações) */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; }
+        .toast { min-width: 250px; padding: 15px; border-radius: 8px; background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.2); border-left: 5px solid; animation: slideIn 0.3s ease forwards; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: #333; }
+        .toast.sucesso { border-color: var(--secondary); } .toast.erro { border-color: var(--danger); } .toast.info { border-color: var(--primary); }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* Utilities */
+        .screen { display: none; animation: fadeUp 0.3s ease; } .screen.active { display: block; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 900; opacity: 0; visibility: hidden; transition: 0.3s; }
+        #overlay.visible { opacity: 1; visibility: visible; }
+        @media (max-width: 900px) { .dashboard-row { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { 
+            #sidebar { position: fixed; top: 0; left: 0; height: 100%; transform: translateX(-100%); }
+            #sidebar.open { transform: translateX(0); }
+            header { display: flex; }
+            #input-busca { width: 150px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="toast-container"></div>
+    <div class="app-container">
+        <div id="overlay" onclick="toggleMenu()"></div>
+
+        <nav id="sidebar">
+            <div class="brand">🚀 FinUltimate</div>
+            <ul class="menu-list">
+                <li class="menu-item"><a class="menu-link active" onclick="navegar('dashboard', this)"><span class="menu-icon">📊</span> Dashboard</a></li>
+                <li class="menu-item"><a class="menu-link" onclick="navegar('lancamentos', this)"><span class="menu-icon">📝</span> Extrato</a></li>
+                <li class="menu-item"><a class="menu-link" onclick="navegar('adicionar', this)"><span class="menu-icon">➕</span> Novo</a></li>
+                <li class="menu-item"><a class="menu-link" onclick="navegar('config', this)"><span class="menu-icon">⚙️</span> Configurações</a></li>
+                <hr style="margin: 10px 15px; border: 0; border-top: 1px solid var(--gray); opacity: 0.3;">
+                <li class="menu-item"><a class="menu-link" onclick="alternarTema()"><span class="menu-icon">🌓</span> Alterar Tema</a></li>
+            </ul>
+        </nav>
+
+        <div class="main-content">
+            <header>
+                <div style="font-weight: bold; color: var(--primary);">FinControl</div>
+                <button onclick="toggleMenu()" style="background:none; border:none; font-size: 24px; color: var(--text-main);">☰</button>
+            </header>
+
+            <div class="page-content">
+                
+                <section id="dashboard" class="screen active">
+                    <div class="header-section">
+                        <h2>Visão Geral</h2>
+                        <select id="filtro-mes" onchange="aplicarFiltro()" style="padding: 8px; border-radius: 8px;">
+                            <option value="atual" selected>📅 Este Mês</option>
+                            <option value="todos">📅 Todo o Período</option>
+                        </select>
+                    </div>
+
+                    <div class="cards-grid">
+                        <div class="card card-total">
+                            <h3>Saldo Atual</h3>
+                            <div class="balance" id="saldo-total">R$ 0,00</div>
+                        </div>
+                        <div class="card">
+                            <div class="info-label">Receitas</div>
+                            <div class="info-value text-green" id="receitas-total">R$ 0,00</div>
+                        </div>
+                        <div class="card">
+                            <div class="info-label">Despesas</div>
+                            <div class="info-value text-red" id="despesas-total">R$ 0,00</div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-row">
+                        <div class="charts-container">
+                            <div class="card" style="height: 350px;">
+                                <h3 style="margin-bottom: 10px;">Despesas por Categoria</h3>
+                                <div style="position: relative; height: 260px; width: 100%;">
+                                    <canvas id="grafico-rosca"></canvas>
+                                </div>
+                            </div>
+                            <div class="card" style="height: 300px;">
+                                <h3 style="margin-bottom: 10px;">Evolução Financeira</h3>
+                                <div style="position: relative; height: 220px; width: 100%;">
+                                    <canvas id="grafico-linha"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 20px;">
+                            <div class="card">
+                                <h3>🎯 Metas (Budget)</h3>
+                                <div id="container-metas" style="margin-top: 15px;"></div>
+                            </div>
+                            <div class="table-container">
+                                <div style="display:flex; justify-content:space-between;">
+                                    <h3>Últimas 5</h3>
+                                    <small style="cursor:pointer; color:var(--primary)" onclick="navegar('lancamentos')">Ver todas</small>
+                                </div>
+                                <br>
+                                <table><tbody id="tabela-dashboard"></tbody></table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="lancamentos" class="screen">
+                    <div class="header-section">
+                        <h2>Extrato Detalhado</h2>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="input-busca" placeholder="🔍 Buscar..." onkeyup="filtrarTabela()">
+                            <button onclick="navegar('adicionar')" style="padding: 8px 15px; background: var(--secondary); color: white; border: none; border-radius: 8px; cursor: pointer;">+ Nova</button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>Data</th><th>Desc</th><th>Cat</th><th>Valor</th><th>Ações</th></tr></thead>
+                            <tbody id="tabela-completa"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section id="adicionar" class="screen">
+                    <div class="header-section"><h2 id="titulo-form">Nova Transação</h2></div>
+                    <div class="form-container">
+                        <form id="form-transacao">
+                            <input type="hidden" id="input-id">
+                            <select id="input-tipo" class="form-control">
+                                <option value="saida">💸 Despesa</option>
+                                <option value="entrada">💰 Receita</option>
+                            </select>
+                            <input type="text" id="input-desc" class="form-control" placeholder="Descrição" required>
+                            <select id="input-categoria" class="form-control">
+                                </select>
+                            <input type="number" step="0.01" id="input-valor" class="form-control" placeholder="0.00" required>
+                            <input type="date" id="input-data" class="form-control" required>
+                            
+                            <div style="margin-bottom: 20px; display: flex; align-items: center;">
+                                <input type="checkbox" id="input-recorrente" style="width: 20px; height: 20px; margin-right: 10px;">
+                                <label for="input-recorrente">Repetir todo mês (Fixo)</label>
+                            </div>
+
+                            <button type="submit" id="btn-salvar" class="btn-submit">Salvar</button>
+                            <button type="button" id="btn-cancelar" onclick="limparFormulario()" style="width:100%; margin-top:10px; background:none; border:none; color:var(--gray); cursor:pointer; display:none;">Cancelar</button>
+                        </form>
+                    </div>
+                </section>
+
+                <section id="config" class="screen">
+                    <h2>Configurações</h2>
+                    <br>
+                    <div class="card">
+                        <h3>💾 Dados e Backup</h3>
+                        <br>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button class="btn-config" onclick="fazerBackup()" style="width: auto;">📥 Backup JSON</button>
+                            <button class="btn-config" onclick="exportarCSV()" style="width: auto;">📊 Exportar Excel (CSV)</button>
+                            <button class="btn-config" onclick="document.getElementById('file-input').click()" style="width: auto;">📤 Restaurar</button>
+                            <input type="file" id="file-input" style="display: none;" onchange="restaurarBackup(this)">
+                        </div>
+                        <br><hr><br>
+                        <h3>🎯 Gerenciar Categorias e Metas</h3>
+                        <p style="color:var(--gray); margin-bottom:15px; font-size:0.9rem;">Adicione categorias para usar no formulário.</p>
+                        <button class="btn-add-meta" onclick="novaMeta()">+ Nova Categoria</button>
+                        <div id="lista-metas-config"></div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+    <script>
+        // --- ESTADO GLOBAL ---
+        let transacoes = [];
+        let metas = { 'Moradia': 2000, 'Alimentação': 1000, 'Transporte': 500, 'Lazer': 300, 'Saúde': 200, 'Salário': 0, 'Outros': 500 };
+        let chartRosca = null;
+        let chartLinha = null;
+
+        // --- 1. INICIALIZAÇÃO ---
+        function init() {
+            if (localStorage.getItem('tema') === 'dark') document.body.setAttribute('data-theme', 'dark');
+            
+            const dbData = localStorage.getItem('fin_v5_data');
+            const dbMetas = localStorage.getItem('fin_v5_metas');
+            
+            if (dbData) transacoes = JSON.parse(dbData);
+            if (dbMetas) metas = JSON.parse(dbMetas);
+
+            // Ajusta input date para hoje
+            document.getElementById('input-data').value = new Date().toISOString().split('T')[0];
+
+            verificarRecorrencia();
+            atualizarSelectCategorias();
+            aplicarFiltro();
+            renderizarMetasConfig();
+        }
+
+        // --- 2. RECORRÊNCIA E BACKUP ---
+        function verificarRecorrencia() {
+            const hoje = new Date();
+            const mesAtual = hoje.getMonth();
+            const anoAtual = hoje.getFullYear();
+            
+            // Pega transações recorrentes
+            const recorrentes = transacoes.filter(t => t.recorrente === true);
+            let count = 0;
+
+            recorrentes.forEach(orig => {
+                const dataOrig = new Date(orig.data);
+                // Se é de mês anterior E não existe cópia neste mês
+                if ((dataOrig.getMonth() !== mesAtual || dataOrig.getFullYear() !== anoAtual) && dataOrig < hoje) {
+                    const jaExiste = transacoes.some(t => t.desc === orig.desc && t.valor === orig.valor && new Date(t.data).getMonth() === mesAtual);
+                    
+                    if (!jaExiste) {
+                        const novaData = new Date();
+                        novaData.setDate(dataOrig.getDate()); // Tenta manter o dia
+                        transacoes.push({ ...orig, id: Date.now() + Math.random(), data: novaData.toISOString().split('T')[0] });
+                        count++;
+                    }
+                }
+            });
+            if (count > 0) { salvarDados(); notificar(`${count} contas fixas geradas para este mês!`, 'info'); }
+        }
+
+        function fazerBackup() {
+            const blob = new Blob([JSON.stringify({ transacoes, metas })], { type: "application/json" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = `backup_financas_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+        }
+
+        function exportarCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,Data,Descricao,Categoria,Tipo,Valor\n";
+            transacoes.forEach(t => {
+                csvContent += `${t.data},${t.desc},${t.categoria},${t.tipo},${t.valor.toFixed(2)}\n`;
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "relatorio_financeiro.csv");
+            document.body.appendChild(link);
+            link.click();
+        }
+
+        function restaurarBackup(input) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const d = JSON.parse(e.target.result);
+                    if(d.transacoes) transacoes = d.transacoes;
+                    if(d.metas) metas = d.metas;
+                    salvarDados();
+                    notificar("Dados restaurados!", "sucesso");
+                    setTimeout(() => location.reload(), 1500);
+                } catch(e) { notificar("Arquivo inválido", "erro"); }
+            };
+            reader.readAsText(input.files[0]);
+        }
+
+        // --- 3. METAS E CATEGORIAS ---
+        function novaMeta() {
+            const nome = prompt("Nome da nova Categoria:");
+            if (!nome) return;
+            const nomeCap = nome.charAt(0).toUpperCase() + nome.slice(1);
+            if (metas[nomeCap]) return notificar("Categoria já existe!", "erro");
+            
+            const val = parseFloat(prompt("Limite mensal (Budget):", "0"));
+            if (isNaN(val)) return notificar("Valor inválido", "erro");
+
+            metas[nomeCap] = val;
+            salvarDados();
+            renderizarMetasConfig();
+            atualizarSelectCategorias();
+            aplicarFiltro();
+            notificar("Categoria criada!", "sucesso");
+        }
+
+        function deletarMeta(cat) {
+            if(confirm(`Excluir ${cat}?`)) {
+                delete metas[cat];
+                salvarDados();
+                renderizarMetasConfig();
+                atualizarSelectCategorias();
+                notificar("Categoria removida", "info");
+            }
+        }
+
+        function renderizarMetasConfig() {
+            const div = document.getElementById('lista-metas-config');
+            div.innerHTML = '';
+            for (let cat in metas) {
+                div.innerHTML += `
+                    <div class="meta-config-item">
+                        <span><b>${cat}</b> (Meta: R$ ${metas[cat]})</span>
+                        <button onclick="deletarMeta('${cat}')" style="border:none; background:none; cursor:pointer;">🗑️</button>
+                    </div>`;
+            }
+        }
+
+        function atualizarSelectCategorias() {
+            const sel = document.getElementById('input-categoria');
+            sel.innerHTML = '';
+            for (let cat in metas) {
+                const opt = document.createElement('option');
+                opt.value = cat; opt.text = cat;
+                sel.appendChild(opt);
+            }
+        }
+
+        // --- 4. CORE: ATUALIZAÇÃO E GRÁFICOS ---
+        function salvarDados() {
+            localStorage.setItem('fin_v5_data', JSON.stringify(transacoes));
+            localStorage.setItem('fin_v5_metas', JSON.stringify(metas));
+            aplicarFiltro();
+        }
+
+        function aplicarFiltro() {
+            const filtro = document.getElementById('filtro-mes').value;
+            const hoje = new Date();
+            
+            let dados = transacoes.filter(t => {
+                if (filtro === 'todos') return true;
+                const d = new Date(t.data + 'T00:00:00'); // Fix timezone issue
+                return d.getMonth() === hoje.getMonth() && d.getFullYear() === hoje.getFullYear();
+            });
+
+            dados.sort((a, b) => new Date(b.data) - new Date(a.data));
+            atualizarInterface(dados);
+        }
+
+        function atualizarInterface(dados) {
+            let ent = 0, sai = 0;
+            let catGastos = {};
+            let diario = {}; // Para o gráfico de linha
+
+            const tbDash = document.getElementById('tabela-dashboard');
+            const tbFull = document.getElementById('tabela-completa');
+            tbDash.innerHTML = ''; tbFull.innerHTML = '';
+
+            // Processar dados
+            dados.forEach((t, i) => {
+                const val = Number(t.valor);
+                
+                // Totais
+                if (t.tipo === 'entrada') ent += val;
+                else {
+                    sai += val;
+                    catGastos[t.categoria] = (catGastos[t.categoria] || 0) + val;
+                }
+
+                // Gráfico Linha (Agrupar por dia)
+                const dia = t.data.slice(8, 10); // Pega o dia "DD"
+                if (!diario[dia]) diario[dia] = 0;
+                diario[dia] += (t.tipo === 'entrada' ? val : -val);
+
+                // Tabelas HTML
+                const html = `<tr>
+                    <td>${new Date(t.data+'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                    <td>${t.recorrente ? '🔄' : ''} ${t.desc}</td>
+                    <td>${t.categoria}</td>
+                    <td class="${t.tipo==='entrada'?'text-green':'text-red'}">R$ ${val.toFixed(2)}</td>
+                    <td><button class="btn-icon" onclick="editar(${t.id})">✏️</button><button class="btn-icon" onclick="deletar(${t.id})" style="color:var(--danger)">🗑️</button></td>
+                </tr>`;
+                
+                tbFull.innerHTML += html;
+                if(i < 5) tbDash.innerHTML += `<tr><td>${t.desc}</td><td class="${t.tipo==='entrada'?'text-green':'text-red'}">R$ ${val.toFixed(2)}</td></tr>`;
+            });
+
+            // Atualizar Cards
+            document.getElementById('receitas-total').innerText = ent.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+            document.getElementById('despesas-total').innerText = sai.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+            document.getElementById('saldo-total').innerText = (ent - sai).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+
+            // Barras de Meta
+            const metaContainer = document.getElementById('container-metas');
+            metaContainer.innerHTML = '';
+            for(let cat in metas) {
+                if(metas[cat] > 0) {
+                    const gasto = catGastos[cat] || 0;
+                    const pct = Math.min((gasto/metas[cat])*100, 100);
+                    metaContainer.innerHTML += `
+                        <div style="margin-bottom:10px; font-size:0.85rem;">
+                            <div style="display:flex; justify-content:space-between;"><span>${cat}</span><span>R$ ${gasto} / ${metas[cat]}</span></div>
+                            <div class="progress-bg"><div class="progress-fill ${pct>90?'danger':''}" style="width:${pct}%"></div></div>
+                        </div>`;
+                }
+            }
+
+            renderizarGraficos(catGastos, diario);
+        }
+
+        // --- 5. GRÁFICOS (CHART.JS) ---
+        function renderizarGraficos(catGastos, diario) {
+            // Rosca
+            const ctx1 = document.getElementById('grafico-rosca').getContext('2d');
+            if(chartRosca) chartRosca.destroy();
+            chartRosca = new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(catGastos),
+                    datasets: [{ data: Object.values(catGastos), backgroundColor: ['#ff4757','#2ed573','#ffa502','#1e90ff','#5352ed'], borderWidth:0 }]
+                },
+                options: { responsive:true, maintainAspectRatio:false, plugins: { legend: { position:'right' } } }
+            });
+
+            // Linha (Evolução Diária)
+            const ctx2 = document.getElementById('grafico-linha').getContext('2d');
+            if(chartLinha) chartLinha.destroy();
+            
+            // Ordenar dias
+            const diasOrdenados = Object.keys(diario).sort();
+            let acumulado = 0;
+            const dadosLinha = diasOrdenados.map(d => {
+                acumulado += diario[d];
+                return acumulado;
+            });
+
+            chartLinha = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: diasOrdenados,
+                    datasets: [{ label: 'Saldo Acumulado', data: dadosLinha, borderColor: '#820ad1', tension: 0.4, fill: false }]
+                },
+                options: { responsive:true, maintainAspectRatio:false }
+            });
+        }
+
+        // --- 6. UTILS (Busca, Toast, CRUD) ---
+        function filtrarTabela() {
+            const termo = document.getElementById('input-busca').value.toLowerCase();
+            document.querySelectorAll('#tabela-completa tr').forEach(tr => {
+                tr.style.display = tr.innerText.toLowerCase().includes(termo) ? '' : 'none';
+            });
+        }
+
+        function notificar(msg, tipo='sucesso') {
+            const t = document.createElement('div');
+            t.className = `toast ${tipo}`;
+            t.innerText = (tipo==='sucesso'?'✅ ':tipo==='erro'?'❌ ':'ℹ️ ') + msg;
+            document.getElementById('toast-container').appendChild(t);
+            setTimeout(()=>t.remove(), 3000);
+        }
+
+        function editar(id) {
+            const t = transacoes.find(x => x.id === id);
+            if(!t) return;
+            document.getElementById('input-id').value = t.id;
+            document.getElementById('input-desc').value = t.desc;
+            document.getElementById('input-valor').value = t.valor;
+            document.getElementById('input-tipo').value = t.tipo;
+            document.getElementById('input-categoria').value = t.categoria;
+            document.getElementById('input-data').value = t.data;
+            document.getElementById('input-recorrente').checked = t.recorrente;
+            
+            document.getElementById('btn-salvar').innerText = "Atualizar";
+            document.getElementById('btn-cancelar').style.display = 'block';
+            document.getElementById('titulo-form').innerText = "Editar Transação";
+            navegar('adicionar');
+        }
+
+        function deletar(id) {
+            if(confirm("Excluir item?")) {
+                transacoes = transacoes.filter(t => t.id !== id);
+                salvarDados();
+                notificar("Item excluído", "erro");
+            }
+        }
+
+        function limparFormulario() {
+            document.getElementById('form-transacao').reset();
+            document.getElementById('input-id').value = '';
+            document.getElementById('btn-salvar').innerText = "Salvar";
+            document.getElementById('btn-cancelar').style.display = 'none';
+            document.getElementById('titulo-form').innerText = "Nova Transação";
+        }
+
+        document.getElementById('form-transacao').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = document.getElementById('input-id').value;
+            const form = {
+                desc: document.getElementById('input-desc').value,
+                valor: Number(document.getElementById('input-valor').value),
+                tipo: document.getElementById('input-tipo').value,
+                categoria: document.getElementById('input-categoria').value,
+                data: document.getElementById('input-data').value,
+                recorrente: document.getElementById('input-recorrente').checked
+            };
+
+            if (id) {
+                const idx = transacoes.findIndex(t => t.id == id);
+                transacoes[idx] = { ...transacoes[idx], ...form };
+                notificar("Transação atualizada!");
+            } else {
+                transacoes.push({ id: Date.now(), ...form });
+                notificar("Transação criada!");
+            }
+            salvarDados();
+            limparFormulario();
+            navegar('dashboard');
+        });
+
+        // UI Helpers
+        function navegar(tela, el) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(tela).classList.add('active');
+            if(el) { document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active')); el.classList.add('active'); }
+            toggleMenu(false);
+        }
+        function toggleMenu(f) {
+            const s = document.getElementById('sidebar'), o = document.getElementById('overlay');
+            if(f===false || s.classList.contains('open')) { s.classList.remove('open'); o.classList.remove('visible'); }
+            else { s.classList.add('open'); o.classList.add('visible'); }
+        }
+        function alternarTema() {
+            const b = document.body;
+            if(b.hasAttribute('data-theme')) { b.removeAttribute('data-theme'); localStorage.setItem('tema','light'); }
+            else { b.setAttribute('data-theme','dark'); localStorage.setItem('tema','dark'); }
+        }
+
+        init();
+    </script>
+</body>
+</html>
