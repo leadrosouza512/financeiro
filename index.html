@@ -177,9 +177,7 @@
     <script>
         // --- 1. CONFIGURAÇÃO DO FIREBASE (COLE SUA CHAVE AQUI) ---
         // Você pegou isso no Passo 3 do painel do Firebase. Substitua tudo dentro das chaves {}.
-        // Import the functions you need from the SDKs you need
-
-const firebaseConfig = {
+        const firebaseConfig = {
   apiKey: "AIzaSyAXU77W9IhtnAlM_vMUEMgM9_WScjEQaVU",
   authDomain: "app-financeiro-c2984.firebaseapp.com",
   projectId: "app-financeiro-c2984",
@@ -188,6 +186,13 @@ const firebaseConfig = {
   appId: "1:296730284016:web:b327a149cf0a7c059ed735",
   measurementId: "G-4XWB5TYSY6"
 };
+
+        // Inicializa Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
         // --- 2. ESTADO GLOBAL ---
         let user = null;
@@ -389,5 +394,3 @@ const firebaseConfig = {
     </script>
 </body>
 </html>
-
-
