@@ -178,13 +178,7 @@
         // --- 1. CONFIGURAÇÃO DO FIREBASE (COLE SUA CHAVE AQUI) ---
         // Você pegou isso no Passo 3 do painel do Firebase. Substitua tudo dentro das chaves {}.
         // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyAXU77W9IhtnAlM_vMUEMgM9_WScjEQaVU",
   authDomain: "app-financeiro-c2984.firebaseapp.com",
@@ -194,17 +188,6 @@ const firebaseConfig = {
   appId: "1:296730284016:web:b327a149cf0a7c059ed735",
   measurementId: "G-4XWB5TYSY6"
 };
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-
-        // Inicializa Firebase
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        const auth = firebase.auth();
-        const db = firebase.firestore();
 
         // --- 2. ESTADO GLOBAL ---
         let user = null;
@@ -406,4 +389,5 @@ const analytics = getAnalytics(app);
     </script>
 </body>
 </html>
+
 
