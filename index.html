@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinControl v14.1 (Cartões Fix)</title>
+    <title>FinControl v14.2 (Fix)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* --- DESIGN SYSTEM --- */
+        /* --- 1. DESIGN SYSTEM --- */
         :root {
             --primary: #1a73e8; 
             --accent-green: #28a745; --accent-red: #dc3545; --accent-purple: #6f42c1;
@@ -30,7 +30,7 @@
         body { background: var(--bg-body); color: var(--text-main); height: 100vh; overflow: hidden; transition: 0.3s; }
         .icon { font-size: 1.2rem; margin-right: 10px; }
 
-        /* --- LAYOUT --- */
+        /* --- LAYOUT & COMPONENTES --- */
         .app-layout { display: flex; height: 100%; display: none; }
         #sidebar { width: 280px; background: var(--bg-card); display: flex; flex-direction: column; border-right: 1px solid var(--border-color); z-index: 2000; transition: 0.3s; }
         .brand { padding: 30px 25px; font-size: 1.4rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 10px; }
@@ -95,7 +95,7 @@
 
     <div id="login-screen">
         <div class="login-card">
-            <h1 style="color:var(--primary); margin-bottom:10px;">FinControl v14.1</h1>
+            <h1 style="color:var(--primary); margin-bottom:10px;">FinControl v14.2</h1>
             <p style="color:var(--text-muted);">Acesso Seguro</p>
             <br>
             <button class="btn" style="background:white; border:1px solid #ddd; width:100%; display:flex; align-items:center; justify-content:center; gap:10px;" onclick="fazerLogin()">
@@ -251,7 +251,7 @@
     </div>
 
     <script>
-        // --- SUAS CHAVES DO FIREBASE ---
+        // --- CHAVES FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyAXU77W9IhtnAlM_vMUEMgM9_WScjEQaVU",
             authDomain: "app-financeiro-c2984.firebaseapp.com",
@@ -309,7 +309,7 @@
             
             if(tipo === 'saida' && metodo === 'credito') {
                 area.style.display = 'block';
-                if(cartoes.length === 0) notificar("Cadastre um cartão primeiro!");
+                if(cartoes.length === 0) notificar("Dica: Cadastre um cartão na aba 'Cartões'!");
             } else {
                 area.style.display = 'none';
             }
@@ -356,14 +356,15 @@
             renderizarGrafico(gastosCat);
         }
 
-        // --- FUNÇÃO CORRIGIDA PARA ADICIONAR CARTÃO ---
+        // --- CORREÇÃO: ADICIONAR CARTÃO ---
         function addCartao() {
             const nome = document.getElementById('novo-card-nome').value;
-            const fech = document.getElementById('novo-card-fech').value;
-            const venc = document.getElementById('novo-card-venc').value;
+            const fech = parseInt(document.getElementById('novo-card-fech').value);
+            const venc = parseInt(document.getElementById('novo-card-venc').value);
             const btn = document.getElementById('btn-add-card');
 
-            if(!nome || !fech || !venc) {
+            // Validação
+            if(!nome || isNaN(fech) || isNaN(venc)) {
                 alert("Preencha todos os campos do cartão!");
                 return;
             }
@@ -371,21 +372,18 @@
             btn.innerText = "...";
             btn.disabled = true;
 
-            db.collection('users').doc(user.uid).collection('cartoes').add({ 
-                nome: nome, 
-                fech: parseInt(fech), 
-                venc: parseInt(venc) 
-            }).then(() => {
-                notificar("Cartão adicionado!");
-                document.getElementById('novo-card-nome').value = '';
-                document.getElementById('novo-card-fech').value = '';
-                document.getElementById('novo-card-venc').value = '';
-            }).catch(e => {
-                alert("Erro ao salvar cartão: " + e.message);
-            }).finally(() => {
-                btn.innerText = "+";
-                btn.disabled = false;
-            });
+            db.collection('users').doc(user.uid).collection('cartoes').add({ nome, fech, venc })
+                .then(() => {
+                    notificar("Cartão Adicionado!");
+                    document.getElementById('novo-card-nome').value = '';
+                    document.getElementById('novo-card-fech').value = '';
+                    document.getElementById('novo-card-venc').value = '';
+                })
+                .catch(e => alert("Erro: " + e.message))
+                .finally(() => {
+                    btn.innerText = "+";
+                    btn.disabled = false;
+                });
         }
 
         function renderizarCartoes() {
@@ -398,64 +396,70 @@
             });
         }
 
+        // --- CORREÇÃO: LANÇAMENTO COM TRY/CATCH ---
         document.getElementById('form-transacao').addEventListener('submit', (e) => {
             e.preventDefault();
             const btn = document.getElementById('btn-salvar');
             btn.innerText = "Processando..."; btn.disabled = true;
 
-            const tipo = document.getElementById('input-tipo').value;
-            const metodo = document.getElementById('input-metodo').value;
-            const desc = document.getElementById('input-desc').value;
-            const cat = document.getElementById('input-categoria').value;
-            const valorTotal = parseFloat(document.getElementById('input-valor').value);
-            const dataCompra = new Date(document.getElementById('input-data').value + "T12:00:00");
+            try {
+                const tipo = document.getElementById('input-tipo').value;
+                const metodo = document.getElementById('input-metodo').value;
+                const desc = document.getElementById('input-desc').value;
+                const cat = document.getElementById('input-categoria').value;
+                const valorTotal = parseFloat(document.getElementById('input-valor').value);
+                const dataCompra = new Date(document.getElementById('input-data').value + "T12:00:00");
 
-            const batch = db.batch();
+                const batch = db.batch();
 
-            if (tipo === 'saida' && metodo === 'credito') {
-                const cartaoId = document.getElementById('input-cartao-id').value;
-                const parcelas = parseInt(document.getElementById('input-parcelas').value);
-                
-                // Validação de segurança
-                if (!cartaoId || cartoes.length === 0) {
-                    alert("Erro: Selecione um cartão válido.");
-                    btn.innerText = "Lançar"; btn.disabled = false;
-                    return;
-                }
+                if (tipo === 'saida' && metodo === 'credito') {
+                    // Validação de Cartão
+                    const cartaoSelect = document.getElementById('input-cartao-id');
+                    if(cartoes.length === 0 || !cartaoSelect.value) {
+                        throw new Error("Cadastre e selecione um cartão antes de lançar!");
+                    }
 
-                const cartaoInfo = document.getElementById('input-cartao-id').options[document.getElementById('input-cartao-id').selectedIndex];
-                const diaFechamento = parseInt(cartaoInfo.getAttribute('data-fech'));
-                const diaVencimento = parseInt(cartaoInfo.getAttribute('data-venc'));
-                const nomeCartao = cartaoInfo.getAttribute('data-nome');
-                const valorParcela = valorTotal / parcelas;
+                    const parcelas = parseInt(document.getElementById('input-parcelas').value);
+                    const cartaoInfo = cartaoSelect.options[cartaoSelect.selectedIndex];
+                    const diaFechamento = parseInt(cartaoInfo.getAttribute('data-fech'));
+                    const diaVencimento = parseInt(cartaoInfo.getAttribute('data-venc'));
+                    const nomeCartao = cartaoInfo.getAttribute('data-nome');
+                    const valorParcela = valorTotal / parcelas;
 
-                for (let i = 0; i < parcelas; i++) {
-                    let dataVencimento = new Date(dataCompra);
-                    let acrescimoMes = i;
-                    if (dataCompra.getDate() >= diaFechamento) { acrescimoMes++; }
-                    dataVencimento.setMonth(dataVencimento.getMonth() + acrescimoMes);
-                    dataVencimento.setDate(diaVencimento);
+                    for (let i = 0; i < parcelas; i++) {
+                        let dataVencimento = new Date(dataCompra);
+                        let acrescimoMes = i;
+                        if (dataCompra.getDate() >= diaFechamento) { acrescimoMes++; }
+                        dataVencimento.setMonth(dataVencimento.getMonth() + acrescimoMes);
+                        dataVencimento.setDate(diaVencimento);
 
+                        const ref = db.collection('users').doc(user.uid).collection('transacoes').doc();
+                        batch.set(ref, {
+                            tipo, metodo, cat,
+                            desc: `${desc} (${i+1}/${parcelas}) - ${nomeCartao}`,
+                            val: valorParcela,
+                            data: dataVencimento.toISOString().split('T')[0],
+                            parcela: `${i+1}/${parcelas}`
+                        });
+                    }
+                } else {
                     const ref = db.collection('users').doc(user.uid).collection('transacoes').doc();
-                    batch.set(ref, {
-                        tipo, metodo, cat,
-                        desc: `${desc} (${i+1}/${parcelas}) - ${nomeCartao}`,
-                        val: valorParcela,
-                        data: dataVencimento.toISOString().split('T')[0],
-                        parcela: `${i+1}/${parcelas}`
-                    });
+                    batch.set(ref, { tipo, metodo, desc, cat, val: valorTotal, data: document.getElementById('input-data').value });
                 }
-            } else {
-                const ref = db.collection('users').doc(user.uid).collection('transacoes').doc();
-                batch.set(ref, { tipo, metodo, desc, cat, val: valorTotal, data: document.getElementById('input-data').value });
-            }
 
-            batch.commit().then(() => {
-                document.getElementById('form-transacao').reset();
-                document.getElementById('input-data').value = new Date().toISOString().split('T')[0];
-                notificar("Lançamento realizado!");
-                navegar('dashboard');
-            }).catch(e => alert(e)).finally(() => { btn.innerText = "Lançar"; btn.disabled = false; });
+                batch.commit().then(() => {
+                    document.getElementById('form-transacao').reset();
+                    document.getElementById('input-data').value = new Date().toISOString().split('T')[0];
+                    notificar("Lançamento realizado!");
+                    navegar('dashboard');
+                }).catch(e => { throw e; }); // Repassa erro para o catch abaixo
+
+            } catch (error) {
+                alert("Erro: " + error.message);
+            } finally {
+                btn.innerText = "Lançar"; 
+                btn.disabled = false;
+            }
         });
 
         function renderizarCats() {
