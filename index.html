@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinControl v14.2 (Fix)</title>
+    <title>FinControl v15 - Stability</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
@@ -30,7 +30,7 @@
         body { background: var(--bg-body); color: var(--text-main); height: 100vh; overflow: hidden; transition: 0.3s; }
         .icon { font-size: 1.2rem; margin-right: 10px; }
 
-        /* --- LAYOUT & COMPONENTES --- */
+        /* --- LAYOUT --- */
         .app-layout { display: flex; height: 100%; display: none; }
         #sidebar { width: 280px; background: var(--bg-card); display: flex; flex-direction: column; border-right: 1px solid var(--border-color); z-index: 2000; transition: 0.3s; }
         .brand { padding: 30px 25px; font-size: 1.4rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 10px; }
@@ -95,7 +95,7 @@
 
     <div id="login-screen">
         <div class="login-card">
-            <h1 style="color:var(--primary); margin-bottom:10px;">FinControl v14.2</h1>
+            <h1 style="color:var(--primary); margin-bottom:10px;">FinControl v15</h1>
             <p style="color:var(--text-muted);">Acesso Seguro</p>
             <br>
             <button class="btn" style="background:white; border:1px solid #ddd; width:100%; display:flex; align-items:center; justify-content:center; gap:10px;" onclick="fazerLogin()">
@@ -309,7 +309,7 @@
             
             if(tipo === 'saida' && metodo === 'credito') {
                 area.style.display = 'block';
-                if(cartoes.length === 0) notificar("Dica: Cadastre um cartão na aba 'Cartões'!");
+                if(cartoes.length === 0) notificar("Cadastre um cartão na aba 'Cartões'!");
             } else {
                 area.style.display = 'none';
             }
@@ -356,53 +356,44 @@
             renderizarGrafico(gastosCat);
         }
 
-        // --- CORREÇÃO: ADICIONAR CARTÃO ---
-        function addCartao() {
-            const nome = document.getElementById('novo-card-nome').value;
-            const fech = parseInt(document.getElementById('novo-card-fech').value);
-            const venc = parseInt(document.getElementById('novo-card-venc').value);
+        // --- CORREÇÃO ASYNC/AWAIT PARA EVITAR TRAVAMENTO ---
+        async function addCartao() {
             const btn = document.getElementById('btn-add-card');
+            try {
+                const nome = document.getElementById('novo-card-nome').value;
+                const fech = parseInt(document.getElementById('novo-card-fech').value);
+                const venc = parseInt(document.getElementById('novo-card-venc').value);
 
-            // Validação
-            if(!nome || isNaN(fech) || isNaN(venc)) {
-                alert("Preencha todos os campos do cartão!");
-                return;
+                if(!nome || isNaN(fech) || isNaN(venc)) throw new Error("Preencha todos os campos!");
+                if(!user) throw new Error("Usuário não logado!");
+
+                btn.innerText = "...";
+                btn.disabled = true;
+
+                await db.collection('users').doc(user.uid).collection('cartoes').add({ nome, fech, venc });
+                
+                notificar("Cartão Adicionado!");
+                document.getElementById('novo-card-nome').value = '';
+                document.getElementById('novo-card-fech').value = '';
+                document.getElementById('novo-card-venc').value = '';
+
+            } catch (error) {
+                alert("Erro: " + error.message);
+            } finally {
+                btn.innerText = "+";
+                btn.disabled = false;
             }
-
-            btn.innerText = "...";
-            btn.disabled = true;
-
-            db.collection('users').doc(user.uid).collection('cartoes').add({ nome, fech, venc })
-                .then(() => {
-                    notificar("Cartão Adicionado!");
-                    document.getElementById('novo-card-nome').value = '';
-                    document.getElementById('novo-card-fech').value = '';
-                    document.getElementById('novo-card-venc').value = '';
-                })
-                .catch(e => alert("Erro: " + e.message))
-                .finally(() => {
-                    btn.innerText = "+";
-                    btn.disabled = false;
-                });
         }
 
-        function renderizarCartoes() {
-            const div = document.getElementById('lista-cartoes');
-            const sel = document.getElementById('input-cartao-id');
-            div.innerHTML = ''; sel.innerHTML = '';
-            cartoes.forEach(c => {
-                div.innerHTML += `<div class="card-mini"><b>${c.nome}</b> <small>Fecha dia ${c.fech} / Vence dia ${c.venc}</small> <button onclick="deletarItem('cartoes','${c.id}')" class="btn-icon" style="color:red;">✕</button></div>`;
-                sel.innerHTML += `<option value="${c.id}" data-fech="${c.fech}" data-venc="${c.venc}" data-nome="${c.nome}">${c.nome}</option>`;
-            });
-        }
-
-        // --- CORREÇÃO: LANÇAMENTO COM TRY/CATCH ---
-        document.getElementById('form-transacao').addEventListener('submit', (e) => {
+        document.getElementById('form-transacao').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btn-salvar');
-            btn.innerText = "Processando..."; btn.disabled = true;
+            btn.innerText = "Processando..."; 
+            btn.disabled = true;
 
             try {
+                if(!user) throw new Error("Usuário não autenticado. Faça login novamente.");
+
                 const tipo = document.getElementById('input-tipo').value;
                 const metodo = document.getElementById('input-metodo').value;
                 const desc = document.getElementById('input-desc').value;
@@ -416,7 +407,7 @@
                     // Validação de Cartão
                     const cartaoSelect = document.getElementById('input-cartao-id');
                     if(cartoes.length === 0 || !cartaoSelect.value) {
-                        throw new Error("Cadastre e selecione um cartão antes de lançar!");
+                        throw new Error("Cadastre e selecione um cartão antes de lançar no crédito!");
                     }
 
                     const parcelas = parseInt(document.getElementById('input-parcelas').value);
@@ -431,6 +422,9 @@
                         let acrescimoMes = i;
                         if (dataCompra.getDate() >= diaFechamento) { acrescimoMes++; }
                         dataVencimento.setMonth(dataVencimento.getMonth() + acrescimoMes);
+                        
+                        // Ajuste para o dia de vencimento (evita bugs de fim de mês)
+                        dataVencimento.setDate(1); 
                         dataVencimento.setDate(diaVencimento);
 
                         const ref = db.collection('users').doc(user.uid).collection('transacoes').doc();
@@ -447,20 +441,31 @@
                     batch.set(ref, { tipo, metodo, desc, cat, val: valorTotal, data: document.getElementById('input-data').value });
                 }
 
-                batch.commit().then(() => {
-                    document.getElementById('form-transacao').reset();
-                    document.getElementById('input-data').value = new Date().toISOString().split('T')[0];
-                    notificar("Lançamento realizado!");
-                    navegar('dashboard');
-                }).catch(e => { throw e; }); // Repassa erro para o catch abaixo
+                await batch.commit();
+                
+                document.getElementById('form-transacao').reset();
+                document.getElementById('input-data').value = new Date().toISOString().split('T')[0];
+                notificar("Lançamento realizado!");
+                navegar('dashboard');
 
             } catch (error) {
-                alert("Erro: " + error.message);
+                alert("Erro ao lançar: " + error.message);
             } finally {
                 btn.innerText = "Lançar"; 
                 btn.disabled = false;
             }
         });
+
+        // --- UTILS ---
+        function renderizarCartoes() {
+            const div = document.getElementById('lista-cartoes');
+            const sel = document.getElementById('input-cartao-id');
+            div.innerHTML = ''; sel.innerHTML = '';
+            cartoes.forEach(c => {
+                div.innerHTML += `<div class="card-mini"><b>${c.nome}</b> <small>Fecha dia ${c.fech} / Vence dia ${c.venc}</small> <button onclick="deletarItem('cartoes','${c.id}')" class="btn-icon" style="color:red;">✕</button></div>`;
+                sel.innerHTML += `<option value="${c.id}" data-fech="${c.fech}" data-venc="${c.venc}" data-nome="${c.nome}">${c.nome}</option>`;
+            });
+        }
 
         function renderizarCats() {
             const div = document.getElementById('lista-cats-config');
