@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinControl Premium</title>
+    <title>FinControl v12 Ultimate</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
@@ -14,190 +14,105 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* --- 1. NOVO DESIGN SYSTEM (Estilo "Planner") --- */
+        /* --- 1. DESIGN SYSTEM --- */
         :root {
-            /* Cores Principais */
-            --primary: #1a73e8; /* Azul Profundo (Google/Planner Blue) */
-            --primary-dark: #0d47a1;
-            --accent-green: #28a745; /* Verde Sucesso */
-            --accent-red: #dc3545; /* Vermelho Despesa */
-            
-            /* Fundos e Textos */
-            --bg-body: #f0f2f5; /* Cinza muito claro para o fundo */
-            --bg-card: #ffffff; /* Branco puro para os cartões */
-            --text-main: #2c3e50; /* Cinza escuro para texto principal */
-            --text-muted: #6c757d; /* Cinza médio para textos secundários */
-            --border-color: #e9ecef;
-            
-            /* Efeitos */
-            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.08); /* Sombra mais suave e difusa */
-            --radius: 16px; /* Bordas mais arredondadas */
+            --primary: #1a73e8; --primary-dark: #0d47a1;
+            --accent-green: #28a745; --accent-red: #dc3545; --accent-warning: #ffc107;
+            --bg-body: #f0f2f5; --bg-card: #ffffff;
+            --text-main: #2c3e50; --text-muted: #6c757d; --border-color: #e9ecef;
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08); --radius: 16px;
         }
 
-        /* Tema Escuro (Adaptado) */
         [data-theme="dark"] {
-            --primary: #4dabf7;
-            --bg-body: #121212; 
-            --bg-card: #1e1e1e; 
-            --text-main: #f8f9fa;
-            --text-muted: #adb5bd;
-            --border-color: #333;
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+            --bg-body: #121212; --bg-card: #1e1e1e; --text-main: #f8f9fa;
+            --text-muted: #adb5bd; --border-color: #333; --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background: var(--bg-body); color: var(--text-main); height: 100vh; overflow: hidden; transition: 0.3s; }
         
-        /* Ícones genéricos */
-        .icon { font-size: 1.4rem; margin-right: 10px; }
+        .icon { font-size: 1.2rem; margin-right: 10px; }
 
-        /* --- 2. TELA DE LOGIN --- */
-        #login-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-body); z-index: 9999;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-        }
-        .login-card {
-            background: var(--bg-card); padding: 50px 40px; border-radius: var(--radius);
-            box-shadow: var(--shadow-md); text-align: center; width: 90%; max-width: 420px;
-        }
-        .btn-google {
-            background: #fff; color: #555; border: 1px solid #ddd;
-            padding: 15px 20px; border-radius: 12px; font-weight: 600; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 15px; width: 100%; margin-top: 30px;
-            transition: 0.2s; font-family: 'Poppins', sans-serif;
-        }
-        .btn-google:hover { background: #f8f8f8; box-shadow: var(--shadow-sm); }
-        .loader {
-            border: 4px solid #f3f3f3; border-top: 4px solid var(--primary);
-            border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* --- 3. LAYOUT APP --- */
+        /* --- 2. LAYOUT --- */
         .app-layout { display: flex; height: 100%; display: none; }
         
-        /* Sidebar (Menu Lateral) */
         #sidebar {
             width: 280px; background: var(--bg-card); display: flex; flex-direction: column;
-            border-right: 1px solid var(--border-color); z-index: 2000; transition: transform 0.3s ease;
+            border-right: 1px solid var(--border-color); z-index: 2000; transition: 0.3s;
         }
-        .brand { padding: 30px 25px; font-size: 1.6rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 12px; }
-        .menu-list { list-style: none; padding: 0 20px; margin-top: 10px; flex: 1; }
+        .brand { padding: 30px 25px; font-size: 1.4rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        .menu-list { list-style: none; padding: 0 15px; flex: 1; }
         .menu-link {
-            display: flex; align-items: center; padding: 14px 18px; text-decoration: none;
-            color: var(--text-muted); border-radius: 12px; font-weight: 500; cursor: pointer; margin-bottom: 8px; transition: 0.2s;
+            display: flex; align-items: center; padding: 12px 18px; text-decoration: none;
+            color: var(--text-muted); border-radius: 12px; font-weight: 500; cursor: pointer; margin-bottom: 5px; transition: 0.2s;
         }
         .menu-link:hover { background: var(--bg-body); color: var(--primary); }
         .menu-link.active { background: rgba(26, 115, 232, 0.1); color: var(--primary); font-weight: 600; }
         
-        .user-info { padding: 25px; border-top: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px; font-size: 0.95rem; }
-        .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary-dark); border: 2px solid var(--primary); }
+        .user-info { padding: 20px; border-top: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px; font-size: 0.9rem; }
+        .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); }
 
-        /* Conteúdo Principal */
         .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
-        header { background: var(--bg-card); padding: 20px 30px; display: none; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); z-index: 1000; }
+        header { background: var(--bg-card); padding: 15px 30px; display: none; justify-content: space-between; align-items: center; box-shadow: var(--shadow-md); z-index: 1000; }
         .page-content { flex: 1; overflow-y: auto; padding: 30px; padding-bottom: 80px; }
-        h2 { font-weight: 600; color: var(--text-main); font-size: 1.5rem; }
 
-        /* --- 4. COMPONENTES UI (Estilo Cards Premium) --- */
-        .card { 
-            background: var(--bg-card); 
-            padding: 25px; 
-            border-radius: var(--radius); 
-            box-shadow: var(--shadow-md); /* Sombra suave */
-            margin-bottom: 25px; 
-            color: var(--text-main);
-            border: 1px solid var(--border-color); /* Borda sutil */
-        }
+        /* --- 3. UI COMPONENTS --- */
+        .card { background: var(--bg-card); padding: 25px; border-radius: var(--radius); box-shadow: var(--shadow-md); margin-bottom: 25px; border: 1px solid var(--border-color); }
         
-        /* Cards de Resumo (Topo) */
-        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-bottom: 35px; }
-        .summary-card {
-            background: var(--bg-card);
-            padding: 30px;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-md);
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-        }
-        /* Barrinha colorida lateral no card */
-        .summary-card::before { content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 6px; }
+        /* Dashboard */
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .summary-card { padding: 25px; background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow-md); border-left: 5px solid transparent; border: 1px solid var(--border-color); position: relative;}
+        .summary-card::before { content:''; position: absolute; left:0; top:0; bottom:0; width:5px; border-top-left-radius: var(--radius); border-bottom-left-radius: var(--radius); }
         .summary-card.saldo::before { background: var(--primary); }
         .summary-card.receitas::before { background: var(--accent-green); }
         .summary-card.despesas::before { background: var(--accent-red); }
-
-        .summary-label { font-size: 0.95rem; font-weight: 500; color: var(--text-muted); margin-bottom: 10px; display: flex; align-items: center; gap: 8px;}
-        .summary-balance { font-size: 2.2rem; font-weight: 700; color: var(--text-main); }
+        .summary-val { font-size: 2rem; font-weight: 700; margin-top: 5px; }
         
-        /* Grids de Layout */
-        .dashboard-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 25px; }
-        
-        /* Tabelas Modernas */
+        /* Tabelas */
         .table-container { overflow-x: auto; }
         table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 600px; }
-        th { text-align: left; color: var(--text-muted); font-weight: 600; padding: 15px 20px; border-bottom: 2px solid var(--border-color); font-size: 0.9rem; }
-        td { padding: 20px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
-        tbody tr:hover { background-color: rgba(0,0,0,0.02); }
+        th { text-align: left; color: var(--text-muted); font-weight: 600; padding: 15px; border-bottom: 2px solid var(--border-color); font-size: 0.9rem; }
+        td { padding: 15px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
         
-        /* Botões e Forms */
-        .btn { padding: 14px 24px; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; font-family: 'Poppins', sans-serif;}
-        .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(26, 115, 232, 0.3); }
-        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        /* Forms e Botões */
+        .btn { padding: 12px 20px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.95rem; }
+        .btn-primary { background: var(--primary); color: white; }
         .btn-danger { background: var(--accent-red); color: white; }
-        .btn-icon { background: rgba(0,0,0,0.05); border: none; cursor: pointer; font-size: 1.1rem; padding: 8px; border-radius: 8px; margin-left: 5px; color: var(--text-muted); transition: 0.2s;}
-        .btn-icon:hover { background: rgba(0,0,0,0.1); color: var(--text-main); }
+        .btn-icon { background: rgba(0,0,0,0.05); border: none; cursor: pointer; padding: 8px; border-radius: 8px; color: var(--text-muted); }
         
-        .form-control, select.form-control { 
-            width: 100%; padding: 14px; border: 2px solid var(--border-color); 
-            background: var(--bg-body); color: var(--text-main); border-radius: 12px; 
-            margin-bottom: 20px; font-size: 1rem; transition: 0.3s; outline: none;
-            font-family: 'Poppins', sans-serif;
-        }
+        .form-control { width: 100%; padding: 12px; border: 2px solid var(--border-color); background: var(--bg-body); color: var(--text-main); border-radius: 10px; margin-bottom: 15px; outline: none; }
         .form-control:focus { border-color: var(--primary); background: var(--bg-card); }
-        .label { font-weight: 600; margin-bottom: 8px; display: block; color: var(--text-main); font-size: 0.95rem; }
+        .label { font-weight: 600; margin-bottom: 5px; display: block; font-size: 0.9rem; }
 
-        /* --- 5. MODAIS --- */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); z-index: 4000;
-            display: flex; justify-content: center; align-items: center;
-            opacity: 0; visibility: hidden; transition: 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-            backdrop-filter: blur(4px);
-        }
-        .modal-overlay.open { opacity: 1; visibility: visible; }
-        .modal-box {
-            background: var(--bg-card); padding: 35px; border-radius: 20px; width: 90%; max-width: 450px;
-            transform: translateY(30px); transition: 0.3s cubic-bezier(0.165, 0.84, 0.44, 1); box-shadow: var(--shadow-md);
-        }
-        .modal-overlay.open .modal-box { transform: translateY(0); }
-        .modal-actions { display: flex; gap: 15px; justify-content: flex-end; margin-top: 30px; }
+        /* Checkbox Recorrência */
+        .checkbox-wrapper { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding: 10px; background: var(--bg-body); border-radius: 10px; cursor: pointer; }
+        .checkbox-wrapper input { width: 20px; height: 20px; cursor: pointer; }
 
-        /* --- 6. TOASTS --- */
-        #toast-container { position: fixed; top: 30px; right: 30px; z-index: 5000; display: flex; flex-direction: column; gap: 15px; }
-        .toast { padding: 18px 25px; background: var(--bg-card); border-left: 6px solid var(--accent-green); box-shadow: var(--shadow-md); border-radius: 12px; animation: slideIn 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); display: flex; align-items: center; gap: 12px; font-weight: 500; }
-        @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        /* Login */
+        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-body); z-index: 9999; display: flex; justify-content: center; align-items: center; }
+        .login-card { background: var(--bg-card); padding: 40px; border-radius: var(--radius); box-shadow: var(--shadow-md); text-align: center; width: 90%; max-width: 400px; }
 
-        /* --- 7. MOBILE --- */
+        /* Toasts */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 5000; display: flex; flex-direction: column; gap: 10px; }
+        .toast { padding: 15px 20px; background: var(--bg-card); border-left: 5px solid var(--primary); box-shadow: var(--shadow-md); border-radius: 8px; animation: slideIn 0.3s; display: flex; align-items: center; gap: 10px; font-weight: 500; }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+        /* Mobile */
         #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1500; opacity: 0; visibility: hidden; transition: 0.3s; }
         #overlay.visible { opacity: 1; visibility: visible; }
-        .screen { display: none; animation: fadeIn 0.3s ease-out; } .screen.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .screen { display: none; animation: fadeIn 0.3s; } .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        @media (max-width: 900px) { .dashboard-grid { grid-template-columns: 1fr; } }
         @media (max-width: 768px) { 
             #sidebar { position: fixed; top: 0; left: 0; height: 100%; transform: translateX(-100%); }
             #sidebar.open { transform: translateX(0); }
             header { display: flex; }
-            .btn-close-menu { display: block !important; color: var(--accent-red); text-align: center; margin-top: 20px; cursor: pointer; font-weight: 600; padding: 15px; }
-            .summary-card { padding: 25px; }
-            .summary-balance { font-size: 1.8rem; }
+            .btn-close-menu { display: block !important; margin-top: 20px; color: var(--accent-red); text-align: center; cursor: pointer; font-weight: 600; }
         }
         .btn-close-menu { display: none; }
+        
+        .progress-bar-bg { width: 100%; height: 6px; background: #eee; border-radius: 3px; overflow: hidden; margin-top: 5px; }
+        .progress-bar-fill { height: 100%; border-radius: 3px; }
     </style>
 </head>
 <body>
@@ -206,26 +121,12 @@
 
     <div id="login-screen">
         <div class="login-card">
-            <h1 style="color:var(--primary); margin-bottom: 15px; font-weight: 700;">FinControl Premium</h1>
-            <p style="color: var(--text-muted);">Seu controle financeiro, elevado.</p>
-            <div id="login-loader" class="loader" style="display:none;"></div>
-            <div id="login-buttons">
-                <button class="btn-google" onclick="fazerLogin()">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="24">
-                    Entrar com Google
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal-delete" class="modal-overlay">
-        <div class="modal-box">
-            <h3 style="font-size: 1.4rem; margin-bottom: 15px;">🗑️ Excluir Item?</h3>
-            <p style="color:var(--text-muted); line-height: 1.6;">Essa ação é irreversível e apagará o dado permanentemente da sua conta na nuvem.</p>
-            <div class="modal-actions">
-                <button class="btn" style="background:var(--bg-body); color:var(--text-muted);" onclick="fecharModal('modal-delete')">Cancelar</button>
-                <button class="btn btn-danger" id="btn-confirm-delete">Sim, Excluir Permanentemente</button>
-            </div>
+            <h1 style="color:var(--primary); margin-bottom:10px;">FinControl v12</h1>
+            <p style="color:var(--text-muted);">A Versão Definitiva.</p>
+            <br>
+            <button class="btn" style="background:white; border:1px solid #ddd; width:100%; display:flex; align-items:center; justify-content:center; gap:10px;" onclick="fazerLogin()">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20"> Entrar com Google
+            </button>
         </div>
     </div>
 
@@ -233,149 +134,141 @@
         <div id="overlay" onclick="toggleMenu(false)"></div>
 
         <aside id="sidebar">
-            <div class="brand">
-                <span style="background: var(--primary); color: white; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px;">FC</span>
-                FinControl
-            </div>
+            <div class="brand">🚀 FinControl</div>
             <ul class="menu-list">
                 <li><a class="menu-link active" onclick="navegar('dashboard', this)"><span class="icon">📊</span> Visão Geral</a></li>
                 <li><a class="menu-link" onclick="navegar('lancamentos', this)"><span class="icon">📝</span> Extrato</a></li>
-                <li><a class="menu-link" onclick="navegar('adicionar', this)"><span class="icon">➕</span> Novo Lançamento</a></li>
+                <li><a class="menu-link" onclick="navegar('adicionar', this)"><span class="icon">➕</span> Novo</a></li>
                 <li><a class="menu-link" onclick="navegar('config', this)"><span class="icon">⚙️</span> Configurações</a></li>
-                <li><a class="menu-link" onclick="alternarTema()"><span class="icon">🌓</span> Alternar Tema</a></li>
+                <li><a class="menu-link" onclick="alternarTema()"><span class="icon">🌓</span> Tema</a></li>
                 <li class="btn-close-menu" onclick="toggleMenu(false)">✕ Fechar Menu</li>
             </ul>
             <div class="user-info">
                 <img id="user-photo" class="user-avatar" src="" alt="">
-                <div style="overflow: hidden;">
-                    <div id="user-name" style="font-weight:600; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">Usuário</div>
-                    <div onclick="auth.signOut()" style="color:var(--accent-red); cursor:pointer; font-size:0.85rem; font-weight: 500;">Sair da conta</div>
+                <div>
+                    <div id="user-name" style="font-weight:600;">Usuário</div>
+                    <div onclick="auth.signOut()" style="color:var(--accent-red); cursor:pointer; font-size:0.8rem;">Sair</div>
                 </div>
             </div>
         </aside>
 
         <main class="main-content">
             <header>
-                <strong style="color:var(--primary); font-size: 1.2rem;">Visão Geral</strong>
-                <button onclick="toggleMenu(true)" style="background:none; border:none; font-size:28px; color: var(--text-main); cursor: pointer;">☰</button>
+                <strong>Finanças</strong>
+                <button onclick="toggleMenu(true)" style="background:none; border:none; font-size:24px;">☰</button>
             </header>
 
             <div class="page-content">
                 
                 <section id="dashboard" class="screen active">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; flex-wrap:wrap; gap:10px;">
                         <div>
-                            <h2 style="margin-bottom: 5px;">Bom dia!</h2>
-                            <p style="color: var(--text-muted);">Aqui está o resumo das suas finanças.</p>
+                            <h2>Visão Geral</h2>
+                            <p style="color:var(--text-muted); font-size:0.9rem;">Selecione o período para análise.</p>
                         </div>
-                        <select id="filtro-mes" onchange="renderizarInterface()" class="form-control" style="width:auto; margin:0; padding: 10px 15px; font-size: 0.9rem;">
-                            <option value="atual">📅 Este Mês</option>
-                            <option value="todos">📅 Todo o Período</option>
-                        </select>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <input type="month" id="filtro-data" class="form-control" style="width:auto; margin:0;" onchange="renderizarInterface()">
+                            <button class="btn" style="padding:10px;" onclick="limparFiltro()">Todos</button>
+                        </div>
                     </div>
 
                     <div class="summary-grid">
                         <div class="summary-card saldo">
-                            <div class="summary-label"><span style="color: var(--primary);">●</span> Saldo Atual</div>
-                            <div class="summary-balance" id="dash-saldo">R$ 0,00</div>
+                            <span style="color:var(--text-muted); font-size:0.9rem;">Saldo no Período</span>
+                            <div class="summary-val" id="dash-saldo">R$ 0,00</div>
                         </div>
                         <div class="summary-card receitas">
-                            <div class="summary-label"><span style="color: var(--accent-green);">↑</span> Receitas</div>
-                            <div class="summary-balance" style="color:var(--accent-green)" id="dash-ent">R$ 0,00</div>
+                            <span style="color:var(--text-muted); font-size:0.9rem;">Receitas</span>
+                            <div class="summary-val" style="color:var(--accent-green)" id="dash-ent">R$ 0,00</div>
                         </div>
                         <div class="summary-card despesas">
-                            <div class="summary-label"><span style="color: var(--accent-red);">↓</span> Despesas</div>
-                            <div class="summary-balance" style="color:var(--accent-red)" id="dash-sai">R$ 0,00</div>
+                            <span style="color:var(--text-muted); font-size:0.9rem;">Despesas</span>
+                            <div class="summary-val" style="color:var(--accent-red)" id="dash-sai">R$ 0,00</div>
                         </div>
                     </div>
 
-                    <div class="dashboard-grid">
-                        <div class="card" style="min-height:380px;">
-                            <h3 style="margin-bottom: 25px; font-weight: 600;">Gastos por Categoria</h3>
-                            <div style="height: 280px; position: relative;">
-                                <canvas id="grafico-rosca"></canvas>
-                            </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px;">
+                        <div class="card" style="min-height:350px;">
+                            <h3>Gastos por Categoria</h3><br>
+                            <div style="height:250px;"><canvas id="grafico-rosca"></canvas></div>
                         </div>
-                        <div class="card" style="min-height:380px;">
-                            <h3 style="margin-bottom: 25px; font-weight: 600;">Orçamento vs. Realizado</h3>
-                            <div id="lista-metas-dash" style="display: flex; flex-direction: column; gap: 20px;"></div>
+
+                        <div class="card" style="min-height:350px;">
+                            <h3>Progresso das Metas</h3>
+                            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Monitoramento em tempo real.</p>
+                            <div class="table-container">
+                                <table id="tabela-metas">
+                                    <thead><tr><th>Categoria</th><th>Gasto</th><th>Meta</th><th>%</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </section>
 
                 <section id="lancamentos" class="screen">
-                    <h2 style="margin-bottom: 25px;">Extrato Detalhado</h2>
-                    <div class="card table-container" style="padding: 0;">
-                        <table id="tabela-extrato">
-                            <thead>
-                                <tr style="background: var(--bg-body);">
-                                    <th style="padding-left: 30px;">Data / Categoria</th>
-                                    <th>Descrição</th>
-                                    <th>Valor</th>
-                                    <th style="text-align: right; padding-right: 30px;">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <h2>Extrato</h2>
+                        <button class="btn btn-primary" onclick="exportarCSV()">📥 Baixar CSV</button>
+                    </div>
+                    <div class="card table-container">
+                        <table id="tabela-extrato"><thead><tr><th>Data</th><th>Desc</th><th>Valor</th><th>Ação</th></tr></thead><tbody></tbody></table>
                     </div>
                 </section>
 
                 <section id="adicionar" class="screen">
-                    <h2 id="titulo-form" style="margin-bottom: 25px; text-align: center;">Novo Lançamento</h2>
-                    <div class="card" style="max-width:550px; margin:0 auto; padding: 40px;">
+                    <h2>Novo Lançamento</h2><br>
+                    <div class="card" style="max-width:600px; margin:0 auto;">
                         <form id="form-transacao">
                             <input type="hidden" id="input-id">
-
-                            <label class="label">Tipo de Operação</label>
-                            <select id="input-tipo" class="form-control"><option value="saida">💸 Despesa (Saída)</option><option value="entrada">💰 Receita (Entrada)</option></select>
+                            
+                            <label class="label">Tipo</label>
+                            <select id="input-tipo" class="form-control"><option value="saida">💸 Despesa</option><option value="entrada">💰 Receita</option></select>
                             
                             <label class="label">Descrição</label>
-                            <input type="text" id="input-desc" class="form-control" placeholder="Ex: Compra no Mercado" required>
+                            <input type="text" id="input-desc" class="form-control" required placeholder="Ex: Aluguel">
                             
                             <label class="label">Categoria</label>
                             <select id="input-categoria" class="form-control"></select>
                             
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                                <div>
-                                    <label class="label">Valor (R$)</label>
-                                    <input type="number" step="0.01" id="input-valor" class="form-control" placeholder="0.00" required style="font-weight: bold; font-size: 1.1rem;">
-                                </div>
-                                <div>
-                                    <label class="label">Data</label>
-                                    <input type="date" id="input-data" class="form-control" required>
-                                </div>
-                            </div>
+                            <label class="label">Valor (R$)</label>
+                            <input type="number" step="0.01" id="input-valor" class="form-control" required placeholder="0.00">
+                            
+                            <label class="label">Data</label>
+                            <input type="date" id="input-data" class="form-control" required>
 
-                            <div style="display: flex; gap: 15px; margin-top: 10px;">
-                                <button type="submit" class="btn btn-primary" id="btn-salvar" style="flex: 1; padding: 16px; font-size: 1rem;">Confirmar Lançamento</button>
-                                <button type="button" class="btn" id="btn-cancelar" style="background: var(--bg-body); color: var(--text-muted); display: none;" onclick="resetForm()">Cancelar</button>
+                            <label class="checkbox-wrapper">
+                                <input type="checkbox" id="input-recorrente">
+                                <span style="font-size:0.9rem;">Despesa Fixa (Repetir todo mês)</span>
+                            </label>
+
+                            <div style="display:flex; gap:10px;">
+                                <button type="submit" class="btn btn-primary" style="flex:1;" id="btn-salvar">Salvar</button>
+                                <button type="button" class="btn" style="background:#eee; display:none;" id="btn-cancelar" onclick="resetForm()">Cancelar</button>
                             </div>
                         </form>
                     </div>
                 </section>
 
                 <section id="config" class="screen">
-                    <h2 style="margin-bottom: 25px;">Configurações</h2>
+                    <h2>Configurações</h2><br>
                     <div class="card">
-                        <h3 style="margin-bottom: 20px;">Gerenciar Categorias e Metas</h3>
-                        <p style="color: var(--text-muted); margin-bottom: 25px;">Defina os limites de gastos mensais para cada categoria.</p>
-                        
-                        <div style="display:flex; gap:15px; background: var(--bg-body); padding: 20px; border-radius: 12px; margin-bottom: 30px; border: 1px solid var(--border-color);">
-                            <input type="text" id="nova-cat-nome" class="form-control" placeholder="Nome da Categoria" style="margin:0; flex: 2;">
-                            <input type="number" id="nova-cat-meta" class="form-control" placeholder="Meta R$" style="margin:0; flex: 1;">
-                            <button onclick="addCategoriaCloud()" class="btn btn-primary" style="width:auto; padding: 0 25px; font-size: 1.2rem;">+</button>
+                        <h3>Categorias</h3>
+                        <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:15px;">Deixe a meta em 0 para não aparecer nos gráficos.</p>
+                        <div style="display:flex; gap:10px; padding-bottom:20px;">
+                            <input type="text" id="nova-cat-nome" class="form-control" placeholder="Nome" style="margin:0; flex:2;">
+                            <input type="number" id="nova-cat-meta" class="form-control" placeholder="Meta" style="margin:0; flex:1;">
+                            <button onclick="addCategoriaCloud()" class="btn btn-primary" style="height:48px;">Add</button>
                         </div>
-                        
                         <div id="lista-cats-config"></div>
                     </div>
                 </section>
-
             </div>
         </main>
     </div>
 
     <script>
-        // --- 1. CONFIGURAÇÃO FIREBASE (SUAS CHAVES AQUI) ---
+        // --- CHAVES FIREBASE (INSIRA AQUI SE PRECISAR TROCAR) ---
         const firebaseConfig = {
             apiKey: "AIzaSyAXU77W9IhtnAlM_vMUEMgM9_WScjEQaVU",
             authDomain: "app-financeiro-c2984.firebaseapp.com",
@@ -385,19 +278,17 @@
             appId: "1:296730284016:web:b327a149cf0a7c059ed735",
             measurementId: "G-4XWB5TYSY6"
         };
-
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // --- 2. ESTADO GLOBAL ---
+        // --- ESTADO ---
         let user = null;
         let transacoes = [];
         let categorias = [];
         let chartInstance = null;
-        let deleteTarget = { col: null, id: null }; 
 
-        // --- 3. AUTH & LISTENERS ---
+        // --- AUTH ---
         auth.onAuthStateChanged((u) => {
             if (u) {
                 user = u;
@@ -406,7 +297,7 @@
                 document.getElementById('user-name').innerText = user.displayName;
                 document.getElementById('user-photo').src = user.photoURL;
                 initListeners();
-                notificar(`Bem-vindo de volta, ${user.displayName.split(' ')[0]}!`);
+                checarRecorrencia(); // Verifica despesas fixas ao logar
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('app-interface').style.display = 'none';
@@ -414,56 +305,87 @@
         });
 
         function fazerLogin() {
-            document.getElementById('login-loader').style.display = 'block';
-            document.getElementById('login-buttons').style.display = 'none';
             const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).catch(erro => {
-                alert("Erro: " + erro.message);
-                document.getElementById('login-loader').style.display = 'none';
-                document.getElementById('login-buttons').style.display = 'block';
-            });
+            auth.signInWithPopup(provider).catch(e => alert(e.message));
         }
 
+        // --- DADOS ---
         function initListeners() {
-            db.collection('users').doc(user.uid).collection('transacoes')
-                .orderBy('data', 'desc')
+            // Pega transações
+            db.collection('users').doc(user.uid).collection('transacoes').orderBy('data', 'desc')
                 .onSnapshot(snap => {
                     transacoes = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     renderizarInterface();
                 });
 
-            db.collection('users').doc(user.uid).collection('categorias')
-                .orderBy('nome', 'asc')
+            // Pega categorias
+            db.collection('users').doc(user.uid).collection('categorias').orderBy('nome', 'asc')
                 .onSnapshot(snap => {
                     categorias = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    if(categorias.length === 0) criarCatsPadrao();
+                    if(categorias.length===0) criarPadrao();
                     renderizarCats();
                 });
         }
-
-        function criarCatsPadrao() {
-            ['Alimentação', 'Lazer', 'Moradia', 'Saúde', 'Transporte'].forEach(nome => {
-                db.collection('users').doc(user.uid).collection('categorias').add({ nome, meta: 1000 });
-            });
+        
+        function criarPadrao() {
+            ['Alimentação', 'Transporte', 'Lazer', 'Moradia'].forEach(n => db.collection('users').doc(user.uid).collection('categorias').add({ nome: n, meta: 1000 }));
         }
 
-        // --- 4. RENDERIZAÇÃO E INTERFACE ---
-        function renderizarInterface() {
-            const filtro = document.getElementById('filtro-mes').value;
+        // --- RECORRÊNCIA AUTOMÁTICA (NOVO!) ---
+        function checarRecorrencia() {
             const hoje = new Date();
-            
+            const mesAtual = hoje.getMonth();
+            const anoAtual = hoje.getFullYear();
+
+            // Busca transações marcadas como recorrentes na nuvem
+            db.collection('users').doc(user.uid).collection('transacoes')
+                .where("recorrente", "==", true)
+                .get()
+                .then(querySnapshot => {
+                    querySnapshot.forEach(doc => {
+                        const t = doc.data();
+                        const dataOriginal = new Date(t.data);
+                        
+                        // Se a despesa é de um mês anterior E ainda não existe neste mês
+                        if ((dataOriginal.getMonth() !== mesAtual || dataOriginal.getFullYear() !== anoAtual) && dataOriginal < hoje) {
+                            
+                            // Verifica duplicidade localmente para evitar spam
+                            const jaExiste = transacoes.some(tr => tr.desc === t.desc && tr.val === t.val && new Date(tr.data).getMonth() === mesAtual);
+                            
+                            if (!jaExiste) {
+                                // Clona para o mês atual
+                                const novaData = new Date();
+                                novaData.setDate(dataOriginal.getDate()); // Mantém o dia (ex: dia 05)
+                                
+                                db.collection('users').doc(user.uid).collection('transacoes').add({
+                                    ...t,
+                                    data: novaData.toISOString().split('T')[0] // Data atualizada
+                                });
+                                notificar(`Despesa fixa lançada: ${t.desc}`);
+                            }
+                        }
+                    });
+                });
+        }
+
+        // --- RENDERIZAÇÃO ---
+        function renderizarInterface() {
+            const filtroData = document.getElementById('filtro-data').value; // YYYY-MM
             let dados = transacoes;
-            if (filtro === 'atual') {
+            
+            // Filtro de Data Avançado
+            if (filtroData) {
+                const [ano, mes] = filtroData.split('-');
                 dados = transacoes.filter(t => {
-                    const d = new Date(t.data);
-                    const localDate = new Date(d.valueOf() + d.getTimezoneOffset() * 60000);
-                    return localDate.getMonth() === hoje.getMonth() && localDate.getFullYear() === hoje.getFullYear();
+                    // Ajuste de fuso horário simples
+                    const d = new Date(t.data + "T00:00:00");
+                    return d.getMonth() === (parseInt(mes) - 1) && d.getFullYear() === parseInt(ano);
                 });
             }
 
             let ent=0, sai=0, gastosPorCat={};
-            const tbody = document.querySelector('#tabela-extrato tbody');
-            tbody.innerHTML = '';
+            const tb = document.querySelector('#tabela-extrato tbody');
+            tb.innerHTML = '';
 
             dados.forEach(t => {
                 if(t.tipo === 'entrada') ent += t.val;
@@ -471,105 +393,120 @@
                     sai += t.val;
                     gastosPorCat[t.cat] = (gastosPorCat[t.cat] || 0) + t.val;
                 }
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="padding-left: 30px;">
-                            <div style="font-weight:600;">${new Date(t.data).toLocaleDateString()}</div>
-                            <div style="color:var(--text-muted); font-size:0.9rem;">${t.cat}</div>
-                        </td>
-                        <td style="font-weight: 500;">${t.desc}</td>
-                        <td style="font-weight: 700; color:${t.tipo==='entrada'?'var(--accent-green)':'var(--accent-red)'}">R$ ${t.val.toFixed(2)}</td>
-                        <td style="text-align: right; padding-right: 30px;">
-                            <button onclick="editarItem('${t.id}')" class="btn-icon">✏️</button>
-                            <button onclick="confirmarDelete('transacoes', '${t.id}')" class="btn-icon" style="color: var(--accent-red);">🗑️</button>
-                        </td>
-                    </tr>`;
+                tb.innerHTML += `<tr>
+                    <td>${new Date(t.data+"T00:00:00").toLocaleDateString()}<br><small>${t.cat}</small></td>
+                    <td>${t.desc} ${t.recorrente ? '🔄' : ''}</td>
+                    <td style="color:${t.tipo==='entrada'?'var(--accent-green)':'var(--accent-red)'}">R$ ${t.val.toFixed(2)}</td>
+                    <td><button onclick="editarItem('${t.id}')" class="btn-icon">✏️</button><button onclick="deletarItem('transacoes','${t.id}')" class="btn-icon" style="color:red">🗑️</button></td>
+                </tr>`;
             });
 
             document.getElementById('dash-saldo').innerText = `R$ ${(ent-sai).toFixed(2)}`;
             document.getElementById('dash-ent').innerText = `R$ ${ent.toFixed(2)}`;
             document.getElementById('dash-sai').innerText = `R$ ${sai.toFixed(2)}`;
 
-            renderizarGraficos(gastosPorCat);
-            renderizarMetas(gastosPorCat);
+            renderizarGrafico(gastosPorCat);
+            renderizarTabelaMetas(gastosPorCat);
         }
 
-        function renderizarMetas(gastosAtuais) {
-            const div = document.getElementById('lista-metas-dash');
-            div.innerHTML = '';
-            categorias.forEach(c => {
+        function renderizarTabelaMetas(gastosAtuais) {
+            const tbody = document.querySelector('#tabela-metas tbody');
+            tbody.innerHTML = '';
+            
+            const catsComMeta = categorias.filter(c => c.meta && c.meta > 0);
+            if(catsComMeta.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:gray;">Sem metas configuradas.</td></tr>'; return;
+            }
+
+            catsComMeta.forEach(c => {
                 const gasto = gastosAtuais[c.nome] || 0;
                 const pct = Math.min((gasto/c.meta)*100, 100);
-                let corBarra = 'var(--primary)';
-                if(pct > 75) corBarra = '#f1c40f'; // Amarelo alerta
-                if(pct > 95) corBarra = 'var(--accent-red)'; // Vermelho perigo
+                let cor = 'var(--primary)';
+                if(pct > 80) cor = 'var(--accent-warning)';
+                if(pct > 100) cor = 'var(--accent-red)';
 
-                div.innerHTML += `
-                    <div>
-                        <div style="display:flex; justify-content:space-between; margin-bottom: 8px; font-weight: 500; font-size: 0.95rem;">
-                            <span>${c.nome}</span>
-                            <span style="color: var(--text-muted);">R$ ${gasto.toFixed(0)} / ${c.meta}</span>
-                        </div>
-                        <div style="background:var(--bg-body); height:10px; border-radius:5px; overflow:hidden; border: 1px solid var(--border-color);">
-                            <div style="width:${pct}%; height:100%; background:${corBarra}; transition: width 0.5s ease-in-out; border-radius: 5px;"></div>
-                        </div>
-                    </div>`;
+                tbody.innerHTML += `<tr>
+                    <td><b>${c.nome}</b></td>
+                    <td>R$ ${gasto.toFixed(0)}</td>
+                    <td style="color:gray">R$ ${c.meta}</td>
+                    <td><div style="font-size:0.8rem;">${pct.toFixed(0)}%</div><div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct}%; background:${cor};"></div></div></td>
+                </tr>`;
             });
         }
 
         function renderizarCats() {
-            const lista = document.getElementById('lista-cats-config');
-            const select = document.getElementById('input-categoria');
-            lista.innerHTML = ''; select.innerHTML = '';
+            const div = document.getElementById('lista-cats-config');
+            const sel = document.getElementById('input-categoria');
+            div.innerHTML = ''; sel.innerHTML = '';
 
             categorias.forEach(c => {
-                lista.innerHTML += `
-                    <div style="padding:15px 20px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items: center; background: var(--bg-card);">
-                        <div>
-                            <div style="font-weight: 600; font-size: 1.05rem;">${c.nome}</div>
-                            <div style="color: var(--text-muted); font-size: 0.9rem;">Meta mensal: R$ ${c.meta}</div>
-                        </div>
-                        <button onclick="confirmarDelete('categorias', '${c.id}')" class="btn-icon" style="color:var(--accent-red); background: rgba(220, 53, 69, 0.1);">🗑️</button>
-                    </div>`;
-                select.innerHTML += `<option value="${c.nome}">${c.nome}</option>`;
+                const metaTxt = (c.meta > 0) ? `Meta: R$ ${c.meta}` : `(Apenas Etiqueta)`;
+                div.innerHTML += `<div style="padding:15px; border-bottom:1px solid #e9ecef; display:flex; justify-content:space-between;">
+                    <div><b>${c.nome}</b> <small style="color:gray; display:block;">${metaTxt}</small></div>
+                    <button onclick="deletarItem('categorias','${c.id}')" class="btn-icon" style="color:red;">🗑️</button>
+                </div>`;
+                sel.innerHTML += `<option value="${c.nome}">${c.nome}</option>`;
             });
         }
 
-        function renderizarGraficos(dados) {
+        function renderizarGrafico(dados) {
             const ctx = document.getElementById('grafico-rosca').getContext('2d');
             if(chartInstance) chartInstance.destroy();
-            
             const labels = Object.keys(dados);
-            const values = Object.values(dados);
-            // Paleta de cores profissional
-            const colors = ['#1a73e8', '#28a745', '#f1c40f', '#e83e8c', '#6610f2', '#fd7e14', '#20c997'];
-
+            const vals = Object.values(dados);
+            const colors = ['#1a73e8','#28a745','#f1c40f','#e83e8c','#6f42c1', '#fd7e14'];
+            
             chartInstance = new Chart(ctx, {
                 type: 'doughnut',
-                data: { 
-                    labels: labels.length?labels:['Sem dados'], 
-                    datasets: [{ 
-                        data: values.length?values:[1], 
-                        backgroundColor: labels.length?colors:['#e9ecef'], 
-                        borderWidth: 2,
-                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim()
-                    }] 
-                },
-                options: { 
-                    maintainAspectRatio: false, 
-                    responsive: true,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true, font: { family: "'Poppins', sans-serif" } } }
-                    },
-                    layout: { padding: { top: 20 } }
-                }
+                data: { labels: labels.length?labels:['Vazio'], datasets: [{ data: vals.length?vals:[1], backgroundColor: labels.length?colors:['#eee'], borderWidth:0 }] },
+                options: { maintainAspectRatio: false, plugins: { legend: { position:'right' } } }
             });
         }
 
-        // --- 5. AÇÕES (SALVAR E EDITAR) ---
+        // --- AÇÕES ---
+        function addCategoriaCloud() {
+            const nome = document.getElementById('nova-cat-nome').value;
+            let meta = document.getElementById('nova-cat-meta').value;
+            if(nome) {
+                meta = meta ? parseFloat(meta) : 0;
+                db.collection('users').doc(user.uid).collection('categorias').add({ nome, meta });
+                document.getElementById('nova-cat-nome').value = '';
+                document.getElementById('nova-cat-meta').value = '';
+                notificar("Categoria criada!");
+            }
+        }
+
+        document.getElementById('form-transacao').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-salvar');
+            const id = document.getElementById('input-id').value;
+            btn.innerText = "Salvando..."; btn.disabled = true;
+
+            const dados = {
+                tipo: document.getElementById('input-tipo').value,
+                desc: document.getElementById('input-desc').value,
+                cat: document.getElementById('input-categoria').value,
+                val: parseFloat(document.getElementById('input-valor').value),
+                data: document.getElementById('input-data').value,
+                recorrente: document.getElementById('input-recorrente').checked
+            };
+
+            const promessa = id ? db.collection('users').doc(user.uid).collection('transacoes').doc(id).update(dados)
+                                : db.collection('users').doc(user.uid).collection('transacoes').add(dados);
+
+            promessa.then(() => {
+                resetForm();
+                notificar("Salvo com sucesso!");
+                navegar('dashboard');
+            }).catch(e => alert(e)).finally(() => { btn.innerText = "Salvar"; btn.disabled = false; });
+        });
+
+        function deletarItem(col, id) {
+            if(confirm("Excluir item?")) db.collection('users').doc(user.uid).collection(col).doc(id).delete();
+        }
+
         function editarItem(id) {
-            const t = transacoes.find(item => item.id === id);
+            const t = transacoes.find(x => x.id === id);
             if(t) {
                 document.getElementById('input-id').value = id;
                 document.getElementById('input-tipo').value = t.tipo;
@@ -577,11 +514,9 @@
                 document.getElementById('input-categoria').value = t.cat;
                 document.getElementById('input-valor').value = t.val;
                 document.getElementById('input-data').value = t.data;
-
-                document.getElementById('btn-salvar').innerText = "Atualizar Lançamento";
+                document.getElementById('input-recorrente').checked = t.recorrente || false;
+                document.getElementById('btn-salvar').innerText = "Atualizar";
                 document.getElementById('btn-cancelar').style.display = 'block';
-                document.getElementById('titulo-form').innerText = "Editar Lançamento";
-
                 navegar('adicionar');
             }
         }
@@ -590,111 +525,57 @@
             document.getElementById('form-transacao').reset();
             document.getElementById('input-id').value = '';
             document.getElementById('input-data').value = new Date().toISOString().split('T')[0];
-            
-            document.getElementById('btn-salvar').innerText = "Confirmar Lançamento";
-            document.getElementById('btn-salvar').disabled = false;
+            document.getElementById('btn-salvar').innerText = "Salvar";
             document.getElementById('btn-cancelar').style.display = 'none';
-            document.getElementById('titulo-form').innerText = "Novo Lançamento";
         }
 
-        document.getElementById('form-transacao').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btn-salvar');
-            const idExistente = document.getElementById('input-id').value;
-
-            btn.disabled = true; 
-            btn.innerText = "Processando...";
-
-            const dados = {
-                tipo: document.getElementById('input-tipo').value,
-                desc: document.getElementById('input-desc').value,
-                cat: document.getElementById('input-categoria').value,
-                val: parseFloat(document.getElementById('input-valor').value),
-                data: document.getElementById('input-data').value
-            };
-
-            let promessa;
-            if (idExistente) {
-                promessa = db.collection('users').doc(user.uid).collection('transacoes').doc(idExistente).update(dados);
-            } else {
-                dados.timestamp = firebase.firestore.FieldValue.serverTimestamp();
-                promessa = db.collection('users').doc(user.uid).collection('transacoes').add(dados);
-            }
-
-            promessa.then(() => {
-                resetForm();
-                notificar(idExistente ? "Lançamento atualizado!" : "Lançamento salvo com sucesso!");
-                navegar('dashboard');
-            }).catch(err => {
-                alert("Erro: " + err);
-                btn.disabled = false;
-                btn.innerText = idExistente ? "Atualizar Lançamento" : "Confirmar Lançamento";
+        // --- UTILS & EXPORT ---
+        function exportarCSV() {
+            let csv = "Data,Descricao,Categoria,Tipo,Valor\n";
+            transacoes.forEach(t => {
+                csv += `${t.data},"${t.desc}","${t.cat}",${t.tipo},${t.val}\n`;
             });
-        });
-
-        function addCategoriaCloud() {
-            const nome = document.getElementById('nova-cat-nome').value;
-            const meta = parseFloat(document.getElementById('nova-cat-meta').value);
-            if(nome && meta) {
-                db.collection('users').doc(user.uid).collection('categorias').add({ nome, meta });
-                document.getElementById('nova-cat-nome').value = '';
-                document.getElementById('nova-cat-meta').value = '';
-                notificar("Nova categoria adicionada!");
-            }
+            const link = document.createElement("a");
+            link.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+            link.download = "relatorio_fincontrol.csv";
+            link.click();
         }
 
-        // --- 6. DELETE SYSTEM ---
-        function confirmarDelete(col, id) {
-            deleteTarget = { col, id };
-            document.getElementById('modal-delete').classList.add('open');
+        function limparFiltro() {
+            document.getElementById('filtro-data').value = '';
+            renderizarInterface();
         }
 
-        document.getElementById('btn-confirm-delete').onclick = () => {
-            if(deleteTarget.id) {
-                db.collection('users').doc(user.uid).collection(deleteTarget.col).doc(deleteTarget.id).delete();
-                notificar("Item excluído permanentemente.");
-                fecharModal('modal-delete');
-            }
-        };
+        function notificar(msg) {
+            const t = document.createElement('div'); t.className = 'toast';
+            t.innerText = `✅ ${msg}`;
+            document.getElementById('toast-container').appendChild(t);
+            setTimeout(()=>t.remove(), 3000);
+        }
 
-        // --- UTILS ---
         function navegar(tela, el) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(tela).classList.add('active');
             if(el) { document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active')); el.classList.add('active'); }
             toggleMenu(false);
         }
-
         function toggleMenu(s) {
-            const sb = document.getElementById('sidebar');
-            const ov = document.getElementById('overlay');
-            if(s){ sb.classList.add('open'); ov.classList.add('visible'); }
-            else { sb.classList.remove('open'); ov.classList.remove('visible'); }
+            const sb = document.getElementById('sidebar'), ov = document.getElementById('overlay');
+            if(s){ sb.classList.add('open'); ov.classList.add('visible'); } else { sb.classList.remove('open'); ov.classList.remove('visible'); }
         }
-
         function alternarTema() {
             const b = document.body;
-            if(b.hasAttribute('data-theme')) { 
-                b.removeAttribute('data-theme'); localStorage.setItem('theme', 'light'); 
-                chartInstance.options.datasets[0].borderColor = '#ffffff';
-            } else { 
-                b.setAttribute('data-theme', 'dark'); localStorage.setItem('theme', 'dark');
-                chartInstance.options.datasets[0].borderColor = '#1e1e1e';
-            }
-            chartInstance.update();
+            if(b.hasAttribute('data-theme')) { b.removeAttribute('data-theme'); localStorage.setItem('theme','light'); }
+            else { b.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); }
         }
 
-        function notificar(msg) {
-            const t = document.createElement('div'); t.className = 'toast';
-            t.innerHTML = `<span style="font-size: 1.2rem;">✨</span> ${msg}`;
-            document.getElementById('toast-container').appendChild(t);
-            setTimeout(()=>t.remove(), 3500);
-        }
-        function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
-
-        // Init
-        document.getElementById('input-data').value = new Date().toISOString().split('T')[0];
-        if(localStorage.getItem('theme')==='dark') document.body.setAttribute('data-theme', 'dark');
+        // Auto Init
+        const hojeISO = new Date().toISOString().split('T')[0];
+        document.getElementById('input-data').value = hojeISO;
+        // Seta filtro inicial para o mês atual
+        document.getElementById('filtro-data').value = hojeISO.slice(0, 7); 
+        
+        if(localStorage.getItem('theme')==='dark') document.body.setAttribute('data-theme','dark');
     </script>
 </body>
 </html>
