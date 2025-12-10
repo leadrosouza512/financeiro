@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinControl Cloud Ultimate</title>
+    <title>FinControl Cloud v10</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
@@ -134,7 +134,7 @@
     <div id="login-screen">
         <div class="login-card">
             <h1 style="color:var(--primary); margin-bottom: 10px;">FinControl Cloud</h1>
-            <p>Seu financeiro em qualquer lugar.</p>
+            <p>Seus dados, seguros na nuvem.</p>
             <div id="login-loader" class="loader" style="display:none;"></div>
             <div id="login-buttons">
                 <button class="btn-google" onclick="fazerLogin()">
@@ -229,9 +229,11 @@
                 </section>
 
                 <section id="adicionar" class="screen">
-                    <h2>Novo Lançamento</h2><br>
+                    <h2 id="titulo-form">Novo Lançamento</h2><br>
                     <div class="card" style="max-width:600px; margin:0 auto;">
                         <form id="form-transacao">
+                            <input type="hidden" id="input-id">
+
                             <label class="label">Tipo</label>
                             <select id="input-tipo" class="form-control"><option value="saida">💸 Despesa</option><option value="entrada">💰 Receita</option></select>
                             
@@ -247,7 +249,10 @@
                             <label class="label">Data</label>
                             <input type="date" id="input-data" class="form-control" required>
 
-                            <button type="submit" class="btn btn-primary" id="btn-salvar">Salvar na Nuvem ☁️</button>
+                            <div style="display: flex; gap: 10px;">
+                                <button type="submit" class="btn btn-primary" id="btn-salvar" style="flex: 1;">Salvar na Nuvem ☁️</button>
+                                <button type="button" class="btn" id="btn-cancelar" style="background: #eee; display: none;" onclick="resetForm()">Cancelar</button>
+                            </div>
                         </form>
                     </div>
                 </section>
@@ -271,18 +276,17 @@
     </div>
 
     <script>
-        // --- 1. CONFIGURAÇÃO FIREBASE (SUBSTITUA AQUI!) ---
+        // --- 1. CONFIGURAÇÃO FIREBASE (JÁ INCLUÍDA) ---
         const firebaseConfig = {
-  apiKey: "AIzaSyAXU77W9IhtnAlM_vMUEMgM9_WScjEQaVU",
-  authDomain: "app-financeiro-c2984.firebaseapp.com",
-  projectId: "app-financeiro-c2984",
-  storageBucket: "app-financeiro-c2984.firebasestorage.app",
-  messagingSenderId: "296730284016",
-  appId: "1:296730284016:web:b327a149cf0a7c059ed735",
-  measurementId: "G-4XWB5TYSY6"
-};
+            apiKey: "AIzaSyAXU77W9IhtnAlM_vMUEMgM9_WScjEQaVU",
+            authDomain: "app-financeiro-c2984.firebaseapp.com",
+            projectId: "app-financeiro-c2984",
+            storageBucket: "app-financeiro-c2984.firebasestorage.app",
+            messagingSenderId: "296730284016",
+            appId: "1:296730284016:web:b327a149cf0a7c059ed735",
+            measurementId: "G-4XWB5TYSY6"
+        };
 
-        // Init Firebase
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
@@ -292,7 +296,7 @@
         let transacoes = [];
         let categorias = [];
         let chartInstance = null;
-        let deleteTarget = { col: null, id: null }; // Para o modal saber o que apagar
+        let deleteTarget = { col: null, id: null }; 
 
         // --- 3. AUTH & LISTENERS ---
         auth.onAuthStateChanged((u) => {
@@ -345,23 +349,20 @@
             });
         }
 
-        // --- 4. RENDERIZAÇÃO ---
+        // --- 4. RENDERIZAÇÃO E INTERFACE ---
         function renderizarInterface() {
             const filtro = document.getElementById('filtro-mes').value;
             const hoje = new Date();
             
-            // Filtragem
             let dados = transacoes;
             if (filtro === 'atual') {
                 dados = transacoes.filter(t => {
                     const d = new Date(t.data);
-                    // Ajuste timezone simples
                     const localDate = new Date(d.valueOf() + d.getTimezoneOffset() * 60000);
                     return localDate.getMonth() === hoje.getMonth() && localDate.getFullYear() === hoje.getFullYear();
                 });
             }
 
-            // Cálculos
             let ent=0, sai=0, gastosPorCat={};
             const tbody = document.querySelector('#tabela-extrato tbody');
             tbody.innerHTML = '';
@@ -373,17 +374,18 @@
                     gastosPorCat[t.cat] = (gastosPorCat[t.cat] || 0) + t.val;
                 }
 
-                // Tabela HTML
                 tbody.innerHTML += `
                     <tr>
                         <td>${new Date(t.data).toLocaleDateString()}<br><small>${t.cat}</small></td>
                         <td>${t.desc}</td>
                         <td style="color:${t.tipo==='entrada'?'var(--secondary)':'var(--danger)'}">R$ ${t.val.toFixed(2)}</td>
-                        <td><button onclick="confirmarDelete('transacoes', '${t.id}')" class="btn-icon">🗑️</button></td>
+                        <td>
+                            <button onclick="editarItem('${t.id}')" class="btn-icon">✏️</button>
+                            <button onclick="confirmarDelete('transacoes', '${t.id}')" class="btn-icon">🗑️</button>
+                        </td>
                     </tr>`;
             });
 
-            // Cards Dashboard
             document.getElementById('dash-saldo').innerText = `R$ ${(ent-sai).toFixed(2)}`;
             document.getElementById('dash-ent').innerText = `R$ ${ent.toFixed(2)}`;
             document.getElementById('dash-sai').innerText = `R$ ${sai.toFixed(2)}`;
@@ -414,13 +416,11 @@
             lista.innerHTML = ''; select.innerHTML = '';
 
             categorias.forEach(c => {
-                // Lista Config
                 lista.innerHTML += `
-                    <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
-                        <span><b>${c.nome}</b> (R$ ${c.meta})</span>
+                    <div style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
+                        <span><b>${c.nome}</b> (Meta: ${c.meta})</span>
                         <button onclick="confirmarDelete('categorias', '${c.id}')" class="btn-icon" style="color:red;">🗑️</button>
                     </div>`;
-                // Select Form
                 select.innerHTML += `<option value="${c.nome}">${c.nome}</option>`;
             });
         }
@@ -440,25 +440,75 @@
             });
         }
 
-        // --- 5. AÇÕES ---
+        // --- 5. AÇÕES (SALVAR E EDITAR) ---
+        
+        // Função para preencher o formulário quando clica em Editar (✏️)
+        function editarItem(id) {
+            const t = transacoes.find(item => item.id === id);
+            if(t) {
+                document.getElementById('input-id').value = id;
+                document.getElementById('input-tipo').value = t.tipo;
+                document.getElementById('input-desc').value = t.desc;
+                document.getElementById('input-categoria').value = t.cat;
+                document.getElementById('input-valor').value = t.val;
+                document.getElementById('input-data').value = t.data;
+
+                // Mudar estado do botão e mostrar cancelar
+                document.getElementById('btn-salvar').innerText = "Atualizar Transação";
+                document.getElementById('btn-cancelar').style.display = 'block';
+                document.getElementById('titulo-form').innerText = "Editando Transação";
+
+                navegar('adicionar');
+            }
+        }
+
+        // Função para limpar o formulário e voltar ao modo "Novo"
+        function resetForm() {
+            document.getElementById('form-transacao').reset();
+            document.getElementById('input-id').value = '';
+            document.getElementById('input-data').value = new Date().toISOString().split('T')[0];
+            
+            document.getElementById('btn-salvar').innerText = "Salvar na Nuvem ☁️";
+            document.getElementById('btn-salvar').disabled = false; // Destrava botão
+            document.getElementById('btn-cancelar').style.display = 'none';
+            document.getElementById('titulo-form').innerText = "Novo Lançamento";
+        }
+
+        // Submissão do Formulário (Salvar ou Atualizar)
         document.getElementById('form-transacao').addEventListener('submit', (e) => {
             e.preventDefault();
             const btn = document.getElementById('btn-salvar');
-            btn.disabled = true; btn.innerText = "Enviando...";
+            const idExistente = document.getElementById('input-id').value;
 
-            db.collection('users').doc(user.uid).collection('transacoes').add({
+            btn.disabled = true; 
+            btn.innerText = "Salvando...";
+
+            const dados = {
                 tipo: document.getElementById('input-tipo').value,
                 desc: document.getElementById('input-desc').value,
                 cat: document.getElementById('input-categoria').value,
                 val: parseFloat(document.getElementById('input-valor').value),
                 data: document.getElementById('input-data').value
-            }).then(() => {
-                e.target.reset();
-                document.getElementById('input-data').value = new Date().toISOString().split('T')[0];
-                notificar("Salvo na nuvem!");
+            };
+
+            let promessa;
+
+            if (idExistente) {
+                // Se tem ID, é ATUALIZAÇÃO (Update)
+                promessa = db.collection('users').doc(user.uid).collection('transacoes').doc(idExistente).update(dados);
+            } else {
+                // Se não tem ID, é CRIAÇÃO (Create)
+                promessa = db.collection('users').doc(user.uid).collection('transacoes').add(dados);
+            }
+
+            promessa.then(() => {
+                resetForm(); // Limpa e destrava o botão
+                notificar(idExistente ? "Atualizado com sucesso!" : "Salvo na nuvem!");
                 navegar('dashboard');
-            }).catch(err => alert(err)).finally(() => {
-                btn.disabled = false; btn.innerText = "Salvar na Nuvem ☁️";
+            }).catch(err => {
+                alert("Erro: " + err);
+                btn.disabled = false;
+                btn.innerText = idExistente ? "Atualizar Transação" : "Salvar na Nuvem ☁️";
             });
         });
 
@@ -473,7 +523,7 @@
             }
         }
 
-        // --- 6. SISTEMA DE DELETE (MODAL) ---
+        // --- 6. DELETE SYSTEM ---
         function confirmarDelete(col, id) {
             deleteTarget = { col, id };
             document.getElementById('modal-delete').classList.add('open');
